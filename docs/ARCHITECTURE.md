@@ -39,7 +39,7 @@ Principios:
 - **Mínimo privilegio en BD:** el servidor crea un cliente Supabase por petición con el JWT del usuario, de modo
   que RLS se aplica siempre. La Service Role Key no se usa en el flujo normal (reservada para tareas
   administrativas puntuales, nunca expuesta).
-- **Inversión de dependencias:** `suggestion-engine` e `importer` definen *puertos* (interfaces); `apps/web`
+- **Inversión de dependencias:** `suggestion-engine` e `importer` definen _puertos_ (interfaces); `apps/web`
   inyecta los adaptadores (Supabase, proveedor IA). Esto permite probar el motor sin red ni BD.
 
 ## 2. Estructura de carpetas propuesta
@@ -84,22 +84,23 @@ Reglas de dependencia (se harán cumplir con ESLint):
 domain  ←  suggestion-engine, importer, ai  ←  apps/web, apps/extension
 ui, i18n  ←  apps/web, apps/extension
 ```
+
 `domain` no depende de nada interno. Los paquetes no importan desde `apps/`. Sin ciclos.
 
 ## 3. Responsabilidades de los módulos
 
-| Módulo | Responsabilidad única | No hace |
-|---|---|---|
-| `domain` | Definir tipos, esquemas y reglas puras (p. ej. `deriveStockStatus`) | E/S, red, BD |
-| `suggestion-engine` | Orquestar el pipeline de análisis y componer sugerencias | Hablar con Supabase o la IA directamente |
-| `ai` | Llamar al proveedor con límites (tokens, tiempo, frecuencia) y registrar consumo | Conocer el inventario o reglas de negocio |
-| `importer` | Convertir un archivo en filas normalizadas + errores + diff | Escribir en BD |
-| `apps/web/server/services` | Casos de uso (importar, sugerir, administrar productos) | Renderizar UI |
-| `apps/web/app/api` | Autenticar, validar entrada, delegar, serializar salida | Contener lógica de negocio |
-| `extension/background` | Sesión, enrutamiento de mensajes, llamadas al API | Leer el DOM |
-| `extension/content/whatsapp` | Detectar el chat abierto y leer el texto de los mensajes de hoy | Escribir en WhatsApp, enviar, hacer clic o scroll |
-| `extension/content/overlay-host` | Insertar, mover, minimizar y restaurar la ventana flotante | Leer mensajes, mostrar datos |
-| `extension/overlay` | Mostrar análisis y permitir copiar | Lógica de negocio, acceso al DOM de WhatsApp |
+| Módulo                           | Responsabilidad única                                                            | No hace                                           |
+| -------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `domain`                         | Definir tipos, esquemas y reglas puras (p. ej. `deriveStockStatus`)              | E/S, red, BD                                      |
+| `suggestion-engine`              | Orquestar el pipeline de análisis y componer sugerencias                         | Hablar con Supabase o la IA directamente          |
+| `ai`                             | Llamar al proveedor con límites (tokens, tiempo, frecuencia) y registrar consumo | Conocer el inventario o reglas de negocio         |
+| `importer`                       | Convertir un archivo en filas normalizadas + errores + diff                      | Escribir en BD                                    |
+| `apps/web/server/services`       | Casos de uso (importar, sugerir, administrar productos)                          | Renderizar UI                                     |
+| `apps/web/app/api`               | Autenticar, validar entrada, delegar, serializar salida                          | Contener lógica de negocio                        |
+| `extension/background`           | Sesión, enrutamiento de mensajes, llamadas al API                                | Leer el DOM                                       |
+| `extension/content/whatsapp`     | Detectar el chat abierto y leer el texto de los mensajes de hoy                  | Escribir en WhatsApp, enviar, hacer clic o scroll |
+| `extension/content/overlay-host` | Insertar, mover, minimizar y restaurar la ventana flotante                       | Leer mensajes, mostrar datos                      |
+| `extension/overlay`              | Mostrar análisis y permitir copiar                                               | Lógica de negocio, acceso al DOM de WhatsApp      |
 
 ## 4. Motor de sugerencias
 
@@ -110,15 +111,15 @@ mensaje(s) ─▶ 1 normalizar ─▶ 2 detectar idioma ─▶ 3 intención ─�
           ─▶ 6 decidir si hace falta IA ─▶ 7 componer respuesta ─▶ 8 traducir/validar ─▶ 9 resultado
 ```
 
-| Paso | Puerto (interfaz) | Implementación por defecto (sin IA) | Respaldo con IA |
-|---|---|---|---|
-| Normalizar | `TextNormalizer` | minúsculas, sin tildes, colapsar letras repetidas, abreviaturas (`xfa`, `q`, `pls`, `tb`) | — |
-| Idioma | `LanguageDetector` | léxico por idioma para mensajes cortos + detector por trigramas para textos largos; devuelve confianza | si confianza < umbral |
-| Intención | `IntentClassifier` | reglas por idioma: `availability`, `price`, `product_info`, `recommendation_by_need`, `greeting`, `other` | si la regla no decide |
-| Entidades | `EntityExtractor` | coincidencia con nombres, SKU y `product_keywords` (sinónimos/indicaciones multilingües verificados) | si no hay coincidencias |
-| Búsqueda | `ProductSearch` | RPC `search_products` (trigramas + texto completo + palabras clave), máx. 5 resultados | — |
-| Respuesta | `ResponseComposer` | plantillas por intención y por idioma con datos de BD | redacción más natural (opcional) |
-| Validación | `GroundingValidator` | verifica que todo precio, cantidad y nombre del texto final exista en los datos recuperados | — |
+| Paso       | Puerto (interfaz)    | Implementación por defecto (sin IA)                                                                       | Respaldo con IA                  |
+| ---------- | -------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Normalizar | `TextNormalizer`     | minúsculas, sin tildes, colapsar letras repetidas, abreviaturas (`xfa`, `q`, `pls`, `tb`)                 | —                                |
+| Idioma     | `LanguageDetector`   | léxico por idioma para mensajes cortos + detector por trigramas para textos largos; devuelve confianza    | si confianza < umbral            |
+| Intención  | `IntentClassifier`   | reglas por idioma: `availability`, `price`, `product_info`, `recommendation_by_need`, `greeting`, `other` | si la regla no decide            |
+| Entidades  | `EntityExtractor`    | coincidencia con nombres, SKU y `product_keywords` (sinónimos/indicaciones multilingües verificados)      | si no hay coincidencias          |
+| Búsqueda   | `ProductSearch`      | RPC `search_products` (trigramas + texto completo + palabras clave), máx. 5 resultados                    | —                                |
+| Respuesta  | `ResponseComposer`   | plantillas por intención y por idioma con datos de BD                                                     | redacción más natural (opcional) |
+| Validación | `GroundingValidator` | verifica que todo precio, cantidad y nombre del texto final exista en los datos recuperados               | —                                |
 
 **Llamadas de IA agrupadas:** los módulos están separados en código, pero cuando hace falta IA el adaptador
 puede resolver idioma + traducción + intención + entidades en **una sola llamada con salida estructurada**
@@ -158,12 +159,12 @@ habilitadas, plantillas y avisos legales. El núcleo no cambia al agregar un ver
 
 Cuatro conceptos independientes:
 
-| Concepto | Origen | Valor inicial |
-|---|---|---|
-| Idioma de la interfaz | catálogo `packages/i18n` | `es-CR` fijo en el MVP |
-| Idioma de la conversación | detectado por mensaje (con contexto de mensajes previos) | automático |
-| Idioma de la base de conocimiento | `organizations.knowledge_base_language` | `es` |
-| Idioma de la respuesta sugerida | por defecto = idioma detectado; el vendedor puede cambiarlo | automático |
+| Concepto                          | Origen                                                      | Valor inicial          |
+| --------------------------------- | ----------------------------------------------------------- | ---------------------- |
+| Idioma de la interfaz             | catálogo `packages/i18n`                                    | `es-CR` fijo en el MVP |
+| Idioma de la conversación         | detectado por mensaje (con contexto de mensajes previos)    | automático             |
+| Idioma de la base de conocimiento | `organizations.knowledge_base_language`                     | `es`                   |
+| Idioma de la respuesta sugerida   | por defecto = idioma detectado; el vendedor puede cambiarlo | automático             |
 
 - **Nombres de productos (D9):** siempre se usa el nombre tal como está en la base de datos, en cualquier
   idioma de respuesta (p. ej. "We currently have Loratadina 10 mg available").
@@ -182,22 +183,22 @@ mensajes **del día**. No existe una API pública para que una extensión lea Wh
 restringen el acceso automatizado; el propietario acepta ese riesgo (ver `SECURITY.md` §7). La integración se
 mantiene detrás del puerto `ConversationSource` para poder sustituirla sin tocar el motor:
 
-| Fuente | Uso |
-|---|---|
-| `WhatsAppDomSource` | Principal. Lectura automática del chat abierto (reglas abajo) |
-| `ManualInputSource` | Respaldo: el vendedor pega texto en la ventana flotante si la lectura falla |
-| `DemoConversationSource` | Conversaciones simuladas para demostración y pruebas |
-| `WhatsAppBusinessApiSource` | Futuro: API oficial de WhatsApp Business Platform |
+| Fuente                      | Uso                                                                         |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `WhatsAppDomSource`         | Principal. Lectura automática del chat abierto (reglas abajo)               |
+| `ManualInputSource`         | Respaldo: el vendedor pega texto en la ventana flotante si la lectura falla |
+| `DemoConversationSource`    | Conversaciones simuladas para demostración y pruebas                        |
+| `WhatsAppBusinessApiSource` | Futuro: API oficial de WhatsApp Business Platform                           |
 
 ### 6.1 Reglas de lectura
 
 1. **Disparador:** el adaptador detecta que el vendedor abrió o cambió de chat (observación del contenedor de
-   la conversación, con *debounce* de ~500 ms) y cuando llega un mensaje **entrante** nuevo al chat abierto.
+   la conversación, con _debounce_ de ~500 ms) y cuando llega un mensaje **entrante** nuevo al chat abierto.
 2. **Alcance temporal:** solo mensajes con fecha de **hoy** (zona horaria `America/Costa_Rica`), según la fecha
    del separador o del metadato del mensaje. Si no se puede determinar la fecha de un mensaje, se excluye.
 3. **Alcance de chats:** solo el chat abierto por el vendedor; solo chats individuales (los grupos se excluyen
    por defecto).
-4. **Sin automatizar la página:** no hace *scroll* para cargar historial, no hace clic, no escribe, no inserta
+4. **Sin automatizar la página:** no hace _scroll_ para cargar historial, no hace clic, no escribe, no inserta
    texto ni despacha eventos. Solo lee texto ya renderizado.
 5. **Minimización:** se extrae únicamente texto, dirección (entrante/saliente) y hora. Se descartan nombres,
    números de teléfono, fotos, audios y adjuntos.
@@ -247,17 +248,17 @@ reutilizan el mismo pipeline de validación, diff y confirmación.
 
 ## 9. Contratos principales (borrador)
 
-| Endpoint | Método | Rol mínimo | Descripción |
-|---|---|---|---|
-| `/api/v1/suggestions` | POST | seller | `{ messages[], replyLanguage? }` → análisis + productos + respuesta |
-| `/api/v1/products` | GET | seller | lista paginada |
-| `/api/v1/products/:id` | PATCH | admin | edición manual |
-| `/api/v1/imports` | POST | admin | sube archivo → cabeceras, muestra, mapeo sugerido |
-| `/api/v1/imports/:id/preview` | POST | admin | mapeo → validación + diff |
-| `/api/v1/imports/:id/commit` | POST | admin | confirma con `expectedInventoryVersion` |
-| `/api/v1/imports/:id/revert` | POST | admin | revierte si no hubo cambios posteriores |
-| `/api/v1/admin/organizations` | GET/POST/PATCH | administrador de plataforma | crear empresas, activar/suspender acceso |
-| `/api/v1/admin/invitations` | POST | administrador de plataforma | invitar usuarios a una empresa |
+| Endpoint                      | Método         | Rol mínimo                  | Descripción                                                         |
+| ----------------------------- | -------------- | --------------------------- | ------------------------------------------------------------------- |
+| `/api/v1/suggestions`         | POST           | seller                      | `{ messages[], replyLanguage? }` → análisis + productos + respuesta |
+| `/api/v1/products`            | GET            | seller                      | lista paginada                                                      |
+| `/api/v1/products/:id`        | PATCH          | admin                       | edición manual                                                      |
+| `/api/v1/imports`             | POST           | admin                       | sube archivo → cabeceras, muestra, mapeo sugerido                   |
+| `/api/v1/imports/:id/preview` | POST           | admin                       | mapeo → validación + diff                                           |
+| `/api/v1/imports/:id/commit`  | POST           | admin                       | confirma con `expectedInventoryVersion`                             |
+| `/api/v1/imports/:id/revert`  | POST           | admin                       | revierte si no hubo cambios posteriores                             |
+| `/api/v1/admin/organizations` | GET/POST/PATCH | administrador de plataforma | crear empresas, activar/suspender acceso                            |
+| `/api/v1/admin/invitations`   | POST           | administrador de plataforma | invitar usuarios a una empresa                                      |
 
 Todos los cuerpos y respuestas se definirán como esquemas Zod en `packages/domain`.
 

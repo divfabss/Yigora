@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "@yigora/ui/styles/theme.css";
+
+/* Escanear clases usadas en los componentes compartidos. */
+@source "../../../../packages/ui/src";

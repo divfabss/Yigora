@@ -7,6 +7,7 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
 ---
 
 ## ADR-001 — Monorepo con pnpm workspaces
+
 - **Estado:** Aceptada
 - **Contexto:** web, extensión y lógica compartida (dominio, motor, importador, UI) deben evolucionar juntos.
 - **Alternativas:** repos separados; monorepo con Turborepo/Nx; monorepo con pnpm workspaces simple.
@@ -15,6 +16,7 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
 - **Consecuencias:** si los tiempos de build crecen, se evaluará Turborepo.
 
 ## ADR-002 — Lógica de backend en Next.js (route handlers) + Supabase para datos y Auth
+
 - **Estado:** Aceptada
 - **Alternativas:** Supabase Edge Functions (Deno); servidor Node separado.
 - **Decisión:** API en `apps/web/app/api/v1` (runtime Node); Supabase para Postgres, Auth y RLS.
@@ -22,12 +24,14 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
 - **Consecuencias:** límites de tiempo de funciones serverless; el motor debe responder en pocos segundos.
 
 ## ADR-003 — Cliente Supabase con JWT del usuario (RLS siempre activa)
+
 - **Estado:** Aceptada
 - **Decisión:** el servidor no usa la Service Role Key en flujos normales. Excepción acotada: invitaciones de
   usuarios por el administrador de plataforma (ADR-011).
 - **Justificación:** mínimo privilegio; un error en servicios no puede saltarse el aislamiento multiempresa.
 
 ## ADR-004 — Lectura automática de WhatsApp Web limitada a mensajes del día
+
 - **Estado:** Aceptada (decisión del propietario, D2). Reemplaza la propuesta de lectura bajo demanda.
 - **Contexto:** no hay API pública para extensiones; las condiciones de WhatsApp restringen el acceso automatizado.
 - **Alternativas:** lectura bajo demanda; lectura automática; solo manual; solo API oficial.
@@ -38,6 +42,7 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
   ante cambios del DOM. Más análisis por vendedor → control de costos por hash de estado del chat.
 
 ## ADR-005 — Ventana flotante sobre WhatsApp Web
+
 - **Estado:** Aceptada (decisión del propietario, D3). Reemplaza la propuesta de Side Panel.
 - **Decisión:** ventana flotante arrastrable y minimizable, renderizada en un iframe de la extensión dentro de un
   Shadow DOM cerrado.
@@ -46,11 +51,13 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
 - **Consecuencias:** se elimina el permiso `sidePanel`; la posición debe evitar tapar la caja de redacción.
 
 ## ADR-006 — Motor de sugerencias determinista primero, IA como respaldo
+
 - **Estado:** Aceptada
 - **Decisión:** búsqueda por trigramas/texto completo/palabras clave y plantillas multilingües; IA solo para
   idioma/traducción/intención ambiguos o redacción opcional; llamadas agrupadas con salida estructurada.
 
 ## ADR-007 — Proveedor de IA: Claude Haiku 5.5 detrás de `LlmProvider`
+
 - **Estado:** Aceptada (decisión del propietario, D4)
 - **Decisión:** adaptador Anthropic con el SDK oficial `@anthropic-ai/sdk`, modelo `claude-haiku-5-5`, más un
   adaptador `mock` para pruebas. Modelo configurable por organización.
@@ -59,17 +66,21 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
   determinista por plantilla.
 
 ## ADR-008 — Parseo de archivos en servidor
+
 - **Estado:** Aceptada
 - **Decisión:** servidor como fuente de verdad. SheetJS Community Edition (versión fijada desde su distribución
   oficial; la de npm está desactualizada) para XLSX y PapaParse para CSV.
 
 ## ADR-009 — Eliminación lógica de productos
+
 - **Estado:** Aceptada. "Eliminar" = `is_active = false`; sin borrado físico por importación.
 
 ## ADR-010 — Sin almacenamiento de conversaciones
+
 - **Estado:** Aceptada. Procesar en memoria; solo métricas sin contenido (Ley 8968, datos de salud).
 
 ## ADR-011 — Acceso solo por invitación concedida por el propietario
+
 - **Estado:** Aceptada (decisión del propietario, D11)
 - **Contexto:** Yigora será un producto de pago, no de uso libre.
 - **Decisión:** registro público desactivado; tabla `platform_admins`; `organizations.access_status` y
@@ -77,7 +88,40 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
 - **Consecuencias:** cobro y suscripciones quedan para después del MVP.
 
 ## ADR-012 — Nombres de productos tal como están en la base de datos
+
 - **Estado:** Aceptada (decisión del propietario, D9). Los nombres no se traducen en ningún idioma de respuesta.
 
 ## ADR-013 — Celdas con fórmula: usar el valor calculado
+
 - **Estado:** Aceptada (decisión del propietario, D10). Nunca se evalúa la fórmula; se marca advertencia.
+
+## ADR-014 — Herramientas y dependencias de la Fase 1
+
+- **Estado:** Aceptada
+- **Contexto:** regla 7 de `CLAUDE.md`: toda dependencia debe justificarse.
+- **Decisión y justificación:**
+
+| Dependencia                                                                                                                                              | Dónde       | Motivo                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------- |
+| `next` 16, `react` 19                                                                                                                                    | web         | Stack aprobado (ADR-002)                                         |
+| `@supabase/ssr`, `@supabase/supabase-js`                                                                                                                 | web         | Sesión por cookies y cliente con RLS                             |
+| `zod` 4                                                                                                                                                  | domain, web | Validación en todas las fronteras                                |
+| `server-only`                                                                                                                                            | web         | Error de compilación si código de servidor llega al navegador    |
+| `tailwindcss` 4, `@tailwindcss/postcss`                                                                                                                  | web, ui     | Sistema de diseño                                                |
+| `class-variance-authority`, `clsx`, `tailwind-merge`, `@radix-ui/react-slot`                                                                             | ui          | Base de componentes estilo shadcn/ui (copiados al repo, sin CLI) |
+| `typescript` 6.0                                                                                                                                         | raíz        | TS 7 aún no es compatible con `typescript-eslint`                |
+| `eslint` 10, `typescript-eslint`, `eslint-plugin-import-x`, `eslint-import-resolver-typescript`, `@next/eslint-plugin-next`, `eslint-plugin-react-hooks` | raíz        | Reglas de calidad, capas y ciclos                                |
+| `prettier`                                                                                                                                               | raíz        | Formato consistente                                              |
+| `vitest` 5, `@playwright/test`                                                                                                                           | raíz, web   | Pruebas unitarias y E2E                                          |
+| `supabase` (CLI)                                                                                                                                         | raíz        | BD local, migraciones y pruebas pgTAP                            |
+
+- **Consecuencias:** Dependabot vigila actualizaciones semanalmente.
+
+## ADR-015 — Seguridad base de la web
+
+- **Estado:** Aceptada
+- **Decisión:** CSP estricta con nonce por petición en `src/proxy.ts` (sin `unsafe-inline`; `unsafe-eval`
+  solo en desarrollo), cabeceras estáticas (HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`,
+  `Permissions-Policy`), variables de entorno validadas sin revelar valores, y logger con lista blanca de
+  campos.
+- **Consecuencias:** las páginas deben renderizarse dinámicamente para recibir el nonce.

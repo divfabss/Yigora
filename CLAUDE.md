@@ -1,8 +1,8 @@
 # CLAUDE.md — Yigora · Instrucciones principales del proyecto
 
-> **Estado:** Fase 0 (planificación). **No existe código de aplicación todavía.**
-> La arquitectura descrita aquí y en `docs/` fue **aprobada** por el propietario (2026-11-18), pero aún no
-> está implementada. No asumir que algo existe porque aparece en la documentación: verificar siempre el código.
+> **Estado:** Fase 1 (fundación) implementada. Existen: monorepo, BD con RLS, `domain`, `ui`, `i18n` y la web
+> base. **Aún no existen** la extensión, el motor de sugerencias, la IA ni el importador. No asumir que algo
+> existe porque aparece en la documentación: verificar siempre el código.
 
 ## 1. Visión del producto
 
@@ -21,17 +21,17 @@ Mercado inicial: Costa Rica. Primer sector: farmacias. Arquitectura **multiempre
 
 Monorepo pnpm. Detalle en `docs/ARCHITECTURE.md`.
 
-| Ruta | Responsabilidad |
-|---|---|
-| `apps/web` | Next.js: landing, dashboard, administración de accesos y API `/api/v1/*` (única puerta al backend) |
-| `apps/extension` | Extensión MV3: service worker, ventana flotante (iframe en Shadow DOM), adaptador de WhatsApp |
-| `packages/domain` | Tipos, esquemas Zod, contratos API, estados de inventario. Sin infraestructura |
-| `packages/suggestion-engine` | Pipeline de sugerencias con puertos inyectables. Sin red ni BD directa |
-| `packages/ai` | Interfaz `LlmProvider` + adaptadores (Anthropic `claude-haiku-5-5`, mock), presupuesto de tokens |
-| `packages/importer` | Parseo seguro XLSX/CSV, mapeo, validación y cálculo de diferencias |
-| `packages/ui` | Sistema de diseño (tokens + componentes shadcn/ui) |
-| `packages/i18n` | Catálogo de textos de interfaz es-CR |
-| `supabase/` | Migraciones versionadas, seed ficticio, pruebas RLS (pgTAP) |
+| Ruta                         | Responsabilidad                                                                                    |
+| ---------------------------- | -------------------------------------------------------------------------------------------------- |
+| `apps/web`                   | Next.js: landing, dashboard, administración de accesos y API `/api/v1/*` (única puerta al backend) |
+| `apps/extension`             | Extensión MV3: service worker, ventana flotante (iframe en Shadow DOM), adaptador de WhatsApp      |
+| `packages/domain`            | Tipos, esquemas Zod, contratos API, estados de inventario. Sin infraestructura                     |
+| `packages/suggestion-engine` | Pipeline de sugerencias con puertos inyectables. Sin red ni BD directa                             |
+| `packages/ai`                | Interfaz `LlmProvider` + adaptadores (Anthropic `claude-haiku-5-5`, mock), presupuesto de tokens   |
+| `packages/importer`          | Parseo seguro XLSX/CSV, mapeo, validación y cálculo de diferencias                                 |
+| `packages/ui`                | Sistema de diseño (tokens + componentes shadcn/ui)                                                 |
+| `packages/i18n`              | Catálogo de textos de interfaz es-CR                                                               |
+| `supabase/`                  | Migraciones versionadas, seed ficticio, pruebas RLS (pgTAP)                                        |
 
 ## 3. Stack (aprobado)
 
@@ -74,21 +74,27 @@ Zod · Vitest · Playwright · Vite (extensión) · pnpm workspaces. Ver `docs/D
 
 ## 7. Comandos principales
 
-_Pendiente (Fase 1)._ Se documentarán en `docs/DEVELOPMENT.md` cuando existan.
+Detalle en `docs/DEVELOPMENT.md`. Antes de cerrar cualquier tarea deben pasar:
+
+```bash
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test
+pnpm db:test
+pnpm build && pnpm test:e2e
+```
 
 ## 8. Índice de documentación
 
-| Archivo | Contenido |
-|---|---|
-| `docs/ARCHITECTURE.md` | Módulos, flujos, contratos, motor de sugerencias, multilingüismo, integración WhatsApp |
-| `docs/DATABASE.md` | Esquema, RLS, índices, importación transaccional, migraciones |
-| `docs/SECURITY.md` | Autenticación, autorización, amenazas, controles, Ley 8968 |
-| `docs/DEVELOPMENT.md` | Instalación, ejecución, pruebas, despliegue |
-| `docs/PROJECT_STATUS.md` | Estado, roadmap, riesgos, deuda técnica, próximas tareas |
-| `docs/DECISIONS.md` | Registro de decisiones arquitectónicas (ADR) |
-| `docs/CHANGELOG.md` | Historial de cambios |
+| Archivo                  | Contenido                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `docs/ARCHITECTURE.md`   | Módulos, flujos, contratos, motor de sugerencias, multilingüismo, integración WhatsApp |
+| `docs/DATABASE.md`       | Esquema, RLS, índices, importación transaccional, migraciones                          |
+| `docs/SECURITY.md`       | Autenticación, autorización, amenazas, controles, Ley 8968                             |
+| `docs/DEVELOPMENT.md`    | Instalación, ejecución, pruebas, despliegue                                            |
+| `docs/PROJECT_STATUS.md` | Estado, roadmap, riesgos, deuda técnica, próximas tareas                               |
+| `docs/DECISIONS.md`      | Registro de decisiones arquitectónicas (ADR)                                           |
+| `docs/CHANGELOG.md`      | Historial de cambios                                                                   |
 
 ## 9. Estado general
 
-Fase 0 cerrada: decisiones aprobadas (ver `docs/DECISIONS.md`). Siguiente: Fase 1 (fundación), pendiente de
-que exista el repositorio GitHub `yigora`.
+Fase 1 implementada en `feat/foundation`, pendiente de revisión. Siguiente: Fase 2 (interfaz).
+Ver `docs/PROJECT_STATUS.md`.
