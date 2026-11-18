@@ -34,22 +34,22 @@
 
 ## 4. Amenazas y controles
 
-| Amenaza | Control |
-|---|---|
-| SQL Injection | Solo cliente Supabase/RPC parametrizado; funciones plpgsql sin `EXECUTE` dinámico con entrada del usuario |
-| XSS | React escapa por defecto; prohibido `dangerouslySetInnerHTML`; CSP estricta con nonces; textos de IA y de archivos se renderizan como texto |
-| CSRF | API de la extensión usa Bearer (no cookies). Server Actions de Next.js con verificación de origen; route handlers con cookie verifican `Origin` |
-| Prompt injection | Mensajes del cliente como datos delimitados; el LLM no tiene herramientas ni acceso a BD; salida con esquema estricto; `GroundingValidator`; solo se envían productos ya filtrados de la org actual |
-| IDOR / acceso cruzado | RLS + verificación de membresía + pruebas pgTAP |
-| Escalada de privilegios | Roles en `memberships` modificables solo por owner/admin; políticas por rol |
-| Manipulación de archivos | Ver §5 |
-| Abuso de endpoints / DoS | Límite por usuario, organización e IP; tamaño máximo de cuerpo; presupuesto diario de IA; tiempos de espera |
-| Exposición de credenciales | Ver §3 |
-| Fugas por logs | Logger estructurado con lista blanca de campos; nunca contenido de mensajes, tokens, archivos ni datos personales |
-| Extensión comprometida/abusiva | Permisos mínimos (`storage` + dos hosts); sin `eval`; CSP de MV3; sin código remoto |
-| Página de WhatsApp leyendo o falsificando la ventana flotante | UI en iframe de origen de la extensión dentro de Shadow DOM cerrado; mensajería solo por `chrome.runtime` validada con Zod, nunca `window.postMessage` |
-| Lectura excesiva de conversaciones | Solo chat abierto, solo mensajes de hoy, sin grupos, sin nombres ni teléfonos, sin persistencia, botón de pausa |
-| Envío automático de mensajes | No existe código de escritura en WhatsApp; prueba estática + E2E (escenario 17) |
+| Amenaza                                                       | Control                                                                                                                                                                                             |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SQL Injection                                                 | Solo cliente Supabase/RPC parametrizado; funciones plpgsql sin `EXECUTE` dinámico con entrada del usuario                                                                                           |
+| XSS                                                           | React escapa por defecto; prohibido `dangerouslySetInnerHTML`; CSP estricta con nonces; textos de IA y de archivos se renderizan como texto                                                         |
+| CSRF                                                          | API de la extensión usa Bearer (no cookies). Server Actions de Next.js con verificación de origen; route handlers con cookie verifican `Origin`                                                     |
+| Prompt injection                                              | Mensajes del cliente como datos delimitados; el LLM no tiene herramientas ni acceso a BD; salida con esquema estricto; `GroundingValidator`; solo se envían productos ya filtrados de la org actual |
+| IDOR / acceso cruzado                                         | RLS + verificación de membresía + pruebas pgTAP                                                                                                                                                     |
+| Escalada de privilegios                                       | Roles en `memberships` modificables solo por owner/admin; políticas por rol                                                                                                                         |
+| Manipulación de archivos                                      | Ver §5                                                                                                                                                                                              |
+| Abuso de endpoints / DoS                                      | Límite por usuario, organización e IP; tamaño máximo de cuerpo; presupuesto diario de IA; tiempos de espera                                                                                         |
+| Exposición de credenciales                                    | Ver §3                                                                                                                                                                                              |
+| Fugas por logs                                                | Logger estructurado con lista blanca de campos; nunca contenido de mensajes, tokens, archivos ni datos personales                                                                                   |
+| Extensión comprometida/abusiva                                | Permisos mínimos (`storage` + dos hosts); sin `eval`; CSP de MV3; sin código remoto                                                                                                                 |
+| Página de WhatsApp leyendo o falsificando la ventana flotante | UI en iframe de origen de la extensión dentro de Shadow DOM cerrado; mensajería solo por `chrome.runtime` validada con Zod, nunca `window.postMessage`                                              |
+| Lectura excesiva de conversaciones                            | Solo chat abierto, solo mensajes de hoy, sin grupos, sin nombres ni teléfonos, sin persistencia, botón de pausa                                                                                     |
+| Envío automático de mensajes                                  | No existe código de escritura en WhatsApp; prueba estática + E2E (escenario 17)                                                                                                                     |
 
 ## 5. Seguridad de archivos importados
 

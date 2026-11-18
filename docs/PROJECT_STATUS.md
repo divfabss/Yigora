@@ -1,56 +1,75 @@
 # Estado del proyecto
 
-_Última actualización: 2026-11-18 — Fase 0 (planificación)._
+_Última actualización: 2026-11-18 — Fase 1 (fundación) implementada, en revisión._
 
 ## Resumen
 
-| Área | Estado |
-|---|---|
-| Repositorio | Git local inicializado; repositorio remoto `yigora` pendiente de creación |
-| Documentación base | Aprobada y actualizada con las decisiones del propietario |
-| Código de aplicación | **No iniciado** |
-| Pruebas | No existen |
+| Área                 | Estado                                                                         |
+| -------------------- | ------------------------------------------------------------------------------ |
+| Repositorio          | `divfabss/yigora`; Fase 1 en la rama `feat/foundation` (PR hacia `main`)       |
+| Documentación base   | Aprobada y sincronizada con el código de la Fase 1                             |
+| Código de aplicación | Fundación: monorepo, BD con RLS, dominio, sistema de diseño, web base          |
+| Pruebas              | 35 unitarias (Vitest) · 44 de BD (pgTAP) · 5 E2E (Playwright) — todas en verde |
 
 ## Funcionalidades
 
-- **Completadas:** ninguna.
-- **En desarrollo:** ninguna.
-- **Pendientes:** todas las del roadmap.
+### Completadas (Fase 1, verificadas con pruebas)
+
+- Monorepo pnpm con TypeScript estricto, ESLint (capas, ciclos, `any`, tamaño), Prettier.
+- Supabase local y 4 migraciones: organizaciones con estado de acceso, administradores de plataforma,
+  perfiles, membresías con roles, productos, palabras clave, auditoría.
+- RLS en todas las tablas con verificación de acceso activo/no vencido; auditoría automática de cambios de
+  acceso y membresías; stock desconocido como `NULL`; sin borrado físico de productos.
+- `@yigora/domain`: estados de inventario, normalización de texto (idéntica a la BD), roles y acceso,
+  idiomas, esquemas Zod de producto.
+- `@yigora/ui`: tokens de diseño claro/oscuro (Tailwind v4) y componentes base (Button, Card, Badge, Input, Label).
+- `@yigora/i18n`: catálogo es-CR.
+- `apps/web`: Next.js 16 con CSP por nonce, cabeceras de seguridad, variables de entorno validadas,
+  clientes Supabase de servidor, logger con lista blanca, `/api/v1/health`, página provisional.
+- CI en GitHub Actions (calidad, BD, E2E, gitleaks) y Dependabot.
+
+### En desarrollo
+
+- Revisión del PR de la Fase 1.
+
+### Pendientes
+
+- Fases 2 a 7 del roadmap.
 
 ## Roadmap
 
 Cada fase termina con pruebas verdes, documentación actualizada y revisión del propietario.
 
-| Fase | Entregables | Criterio de cierre |
-|---|---|---|
-| **0 — Planificación** | Documentación, decisiones, riesgos | Aprobación del propietario |
-| **1 — Fundación** | Repositorio `yigora`, monorepo, TS estricto, ESLint (capas y sin ciclos), Prettier, Vitest, Playwright, CI (lint, tipos, pruebas, gitleaks), `.env.example`, Supabase local, migraciones iniciales (orgs con estado de acceso, platform_admins, memberships, products, RLS), tokens de diseño + componentes base | CI verde; pruebas pgTAP de aislamiento multiempresa pasan |
-| **2 — Interfaz** | Landing Yigora, inicio de sesión por invitación, dashboard (estado, inventario, empresa, idioma), administración de accesos, demo con ventana flotante simulada | E2E de navegación y accesibilidad básica |
-| **3 — Inventario** | Seed ficticio, CRUD, importador XLSX/CSV con mapeo, validación, diff, confirmación transaccional, historial, reversión | Escenarios 1–8 pasan |
-| **4 — Motor** | Normalización, búsqueda (RPC), intención, entidades, disponibilidad, plantillas, `LlmProvider` + mock, presupuesto de tokens, `GroundingValidator`, límites de frecuencia | Escenarios 10, 11, 15 pasan |
-| **5 — Multilingüismo** | Detección de idioma, traducción con términos protegidos, respuestas en 6 idiomas, selector manual, conjunto de pruebas de precisión | Escenarios 12–14 pasan; precisión medida y documentada |
-| **6 — Extensión** | MV3, ventana flotante (iframe + Shadow DOM), vinculación de sesión, lectura automática de mensajes de hoy, respaldo manual, *spike* de estabilidad | Escenarios 16–17 pasan; informe de viabilidad del adaptador |
-| **7 — Calidad final** | Auditoría de seguridad, rendimiento, documentación, correcciones, informe final | Todas las pruebas verdes; informe entregado |
+| Fase                   | Entregables                                                                                                                                                                                                                                                                                                      | Criterio de cierre                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| **0 — Planificación**  | Documentación, decisiones, riesgos                                                                                                                                                                                                                                                                               | Aprobación del propietario                                  |
+| **1 — Fundación**      | Repositorio `yigora`, monorepo, TS estricto, ESLint (capas y sin ciclos), Prettier, Vitest, Playwright, CI (lint, tipos, pruebas, gitleaks), `.env.example`, Supabase local, migraciones iniciales (orgs con estado de acceso, platform_admins, memberships, products, RLS), tokens de diseño + componentes base | CI verde; pruebas pgTAP de aislamiento multiempresa pasan   |
+| **2 — Interfaz**       | Landing Yigora, inicio de sesión por invitación, dashboard (estado, inventario, empresa, idioma), administración de accesos, demo con ventana flotante simulada                                                                                                                                                  | E2E de navegación y accesibilidad básica                    |
+| **3 — Inventario**     | Seed ficticio, CRUD, importador XLSX/CSV con mapeo, validación, diff, confirmación transaccional, historial, reversión                                                                                                                                                                                           | Escenarios 1–8 pasan                                        |
+| **4 — Motor**          | Normalización, búsqueda (RPC), intención, entidades, disponibilidad, plantillas, `LlmProvider` + mock, presupuesto de tokens, `GroundingValidator`, límites de frecuencia                                                                                                                                        | Escenarios 10, 11, 15 pasan                                 |
+| **5 — Multilingüismo** | Detección de idioma, traducción con términos protegidos, respuestas en 6 idiomas, selector manual, conjunto de pruebas de precisión                                                                                                                                                                              | Escenarios 12–14 pasan; precisión medida y documentada      |
+| **6 — Extensión**      | MV3, ventana flotante (iframe + Shadow DOM), vinculación de sesión, lectura automática de mensajes de hoy, respaldo manual, _spike_ de estabilidad                                                                                                                                                               | Escenarios 16–17 pasan; informe de viabilidad del adaptador |
+| **7 — Calidad final**  | Auditoría de seguridad, rendimiento, documentación, correcciones, informe final                                                                                                                                                                                                                                  | Todas las pruebas verdes; informe entregado                 |
 
 ## Decisiones (resueltas el 2026-11-18)
 
-| # | Decisión | Resultado |
-|---|---|---|
-| D1 | Monorepo pnpm | Aceptada (ADR-001) |
-| D2 | Integración WhatsApp | **Lectura automática al entrar al chat del cliente, solo mensajes del día** (ADR-004) |
-| D3 | Interfaz en WhatsApp | **Ventana flotante con recomendaciones** (ADR-005) |
-| D4 | Modelo de IA | **Claude Haiku 5.5** (`claude-haiku-5-5`) (ADR-007) |
-| D5 | Backend Next.js + Supabase | Aceptada (ADR-002) |
-| D6 | Hosting Vercel + Supabase Cloud | Aceptada; región de Supabase por confirmar al crear el proyecto |
-| D7 | Sesión de la extensión en memoria | Aceptada |
-| D8 | Campos extra de producto y `product_keywords` | Aceptada |
-| D9 | Nombres de productos | **Siempre los de la BD** (ADR-012) |
-| D10 | Celdas con fórmula | **Usar el valor ya calculado** (ADR-013) |
-| D11 | Acceso | **Solo por invitación; el propietario concede el acceso; sin demo pública** (ADR-011) |
-| D12 | Repositorio | Nuevo repositorio `yigora` — **pendiente: debe crearlo el propietario** (la sesión no puede crear repositorios) |
-| D13 | Retención | Aceptada (30 días / 12 meses) |
-| D14 | Revisión legal | Recomendada antes de distribuir a clientes |
-| D15 | Nombre del producto | **Yigora** |
+| #   | Decisión                                      | Resultado                                                                             |
+| --- | --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| D1  | Monorepo pnpm                                 | Aceptada (ADR-001)                                                                    |
+| D2  | Integración WhatsApp                          | **Lectura automática al entrar al chat del cliente, solo mensajes del día** (ADR-004) |
+| D3  | Interfaz en WhatsApp                          | **Ventana flotante con recomendaciones** (ADR-005)                                    |
+| D4  | Modelo de IA                                  | **Claude Haiku 5.5** (`claude-haiku-5-5`) (ADR-007)                                   |
+| D5  | Backend Next.js + Supabase                    | Aceptada (ADR-002)                                                                    |
+| D6  | Hosting Vercel + Supabase Cloud               | Aceptada; región de Supabase por confirmar al crear el proyecto                       |
+| D7  | Sesión de la extensión en memoria             | Aceptada                                                                              |
+| D8  | Campos extra de producto y `product_keywords` | Aceptada                                                                              |
+| D9  | Nombres de productos                          | **Siempre los de la BD** (ADR-012)                                                    |
+| D10 | Celdas con fórmula                            | **Usar el valor ya calculado** (ADR-013)                                              |
+| D11 | Acceso                                        | **Solo por invitación; el propietario concede el acceso; sin demo pública** (ADR-011) |
+| D12 | Repositorio                                   | `divfabss/yigora` creado por el propietario                                           |
+| D13 | Retención                                     | Aceptada (30 días / 12 meses)                                                         |
+| D14 | Revisión legal                                | Recomendada antes de distribuir a clientes                                            |
+| D15 | Nombre del producto                           | **Yigora**                                                                            |
 
 ### Preguntas abiertas menores (con valor por defecto)
 
@@ -60,29 +79,37 @@ Cada fase termina con pruebas verdes, documentación actualizada y revisión del
 
 ## Riesgos técnicos y limitaciones
 
-| Riesgo | Impacto | Mitigación |
-|---|---|---|
-| Lectura automática de WhatsApp: cambios frecuentes del DOM y restricciones de las condiciones de uso (posible riesgo para la cuenta del vendedor) — **riesgo aceptado por el propietario** | Alto | Adaptador aislado de solo lectura; alcance mínimo (hoy, chat abierto); pausa; respaldo manual; ruta oficial futura; revisión legal |
-| Sugerencias de medicamentos incorrectas o no respaldadas | Alto | IA sin conocimiento médico propio; solo datos verificados; validador; avisos; marca de receta |
-| Datos de salud enviados a un proveedor externo | Alto | No almacenar; minimizar; contrato con proveedor; IA desactivable |
-| Fallo de RLS → fuga entre empresas | Alto | Pruebas pgTAP en CI; advisors de Supabase; doble barrera |
-| Detección de idioma en mensajes muy cortos ("ok", "precio?") | Medio | Contexto de mensajes previos; confianza visible; selector manual |
-| Heterogeneidad de Excel (separadores decimales, codificación, encabezados) | Medio | Mapeo asistido; detección de ambigüedad; plantilla descargable |
-| Costo y latencia de IA (mayor volumen por lectura automática) | Medio | Haiku 5.5; determinista primero; llamadas agrupadas; análisis solo con mensajes entrantes nuevos; caché; topes |
-| Ventana flotante tapando o interfiriendo con WhatsApp | Medio | Tamaño compacto, arrastrable, minimizable; iframe aislado |
-| Revisión de Chrome Web Store para extensiones que operan en WhatsApp | Medio | Permisos mínimos y justificados; distribución no listada en piloto |
-| Concurrencia entre importaciones y ediciones | Medio | `inventory_version` + bloqueo en transacción |
-| Supabase local requiere Docker | Bajo | Documentado en `DEVELOPMENT.md` |
+| Riesgo                                                                                                                                                                                     | Impacto | Mitigación                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Lectura automática de WhatsApp: cambios frecuentes del DOM y restricciones de las condiciones de uso (posible riesgo para la cuenta del vendedor) — **riesgo aceptado por el propietario** | Alto    | Adaptador aislado de solo lectura; alcance mínimo (hoy, chat abierto); pausa; respaldo manual; ruta oficial futura; revisión legal |
+| Sugerencias de medicamentos incorrectas o no respaldadas                                                                                                                                   | Alto    | IA sin conocimiento médico propio; solo datos verificados; validador; avisos; marca de receta                                      |
+| Datos de salud enviados a un proveedor externo                                                                                                                                             | Alto    | No almacenar; minimizar; contrato con proveedor; IA desactivable                                                                   |
+| Fallo de RLS → fuga entre empresas                                                                                                                                                         | Alto    | Pruebas pgTAP en CI; advisors de Supabase; doble barrera                                                                           |
+| Detección de idioma en mensajes muy cortos ("ok", "precio?")                                                                                                                               | Medio   | Contexto de mensajes previos; confianza visible; selector manual                                                                   |
+| Heterogeneidad de Excel (separadores decimales, codificación, encabezados)                                                                                                                 | Medio   | Mapeo asistido; detección de ambigüedad; plantilla descargable                                                                     |
+| Costo y latencia de IA (mayor volumen por lectura automática)                                                                                                                              | Medio   | Haiku 5.5; determinista primero; llamadas agrupadas; análisis solo con mensajes entrantes nuevos; caché; topes                     |
+| Ventana flotante tapando o interfiriendo con WhatsApp                                                                                                                                      | Medio   | Tamaño compacto, arrastrable, minimizable; iframe aislado                                                                          |
+| Revisión de Chrome Web Store para extensiones que operan en WhatsApp                                                                                                                       | Medio   | Permisos mínimos y justificados; distribución no listada en piloto                                                                 |
+| Concurrencia entre importaciones y ediciones                                                                                                                                               | Medio   | `inventory_version` + bloqueo en transacción                                                                                       |
+| Supabase local requiere Docker                                                                                                                                                             | Bajo    | Documentado en `DEVELOPMENT.md`                                                                                                    |
 
 Limitaciones conocidas: la lectura depende de la estructura actual de WhatsApp Web y puede romperse sin aviso;
 su estabilidad real solo se confirmará con una cuenta de prueba en la Fase 6.
 
 ## Deuda técnica
 
-Ninguna (no hay código).
+- No se impide eliminar o degradar al último `owner` de una organización (agregar trigger en la Fase 2,
+  junto con la administración de miembros).
+- `products.last_import_id` no tiene FK todavía; se agrega con `import_batches` en la Fase 3.
+- Acciones de GitHub fijadas por versión mayor, no por SHA.
+- Proyecto de Supabase Cloud aún no creado (requiere elegir región).
+
+## Errores conocidos
+
+Ninguno.
 
 ## Próximas tareas
 
-1. Propietario crea el repositorio privado `yigora` en GitHub y lo conecta a la sesión.
-2. Subir el historial local (documentación de Fase 0) a `main`.
-3. Iniciar Fase 1 en la rama `feat/foundation`.
+1. Revisar y aprobar el PR de la Fase 1; confirmar que el CI pase en GitHub.
+2. Fase 2: landing de Yigora, inicio de sesión por invitación, dashboard, administración de accesos y
+   demo con ventana flotante simulada.
