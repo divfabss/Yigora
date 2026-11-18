@@ -1,0 +1,29 @@
+# Dependencias y builds
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Variables de entorno (nunca subir secretos)
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Pruebas
+playwright-report/
+test-results/
+
+# Sistema / editores
+.DS_Store
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.claude/settings.local.json
