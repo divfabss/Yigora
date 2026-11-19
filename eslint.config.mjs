@@ -24,6 +24,7 @@ export default defineConfig(
       "**/playwright-report/**",
       "**/test-results/**",
       "**/next-env.d.ts",
+      "apps/extension/scripts/**",
       "supabase/**",
     ],
   },
@@ -81,7 +82,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["apps/web/**/*.{ts,tsx}", "packages/ui/**/*.tsx"],
+    files: ["apps/web/**/*.{ts,tsx}", "apps/extension/**/*.tsx", "packages/ui/**/*.tsx"],
     plugins: { "react-hooks": reactHooks },
     rules: reactHooks.configs.recommended.rules,
   },

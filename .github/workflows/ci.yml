@@ -59,6 +59,13 @@ jobs:
       - run: pnpm --filter @yigora/web exec playwright install --with-deps chromium
       - run: pnpm build
       - run: pnpm test:e2e
+      - name: Paquete de la extensión (demo)
+        run: pnpm --filter @yigora/extension package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yigora-extension-demo
+          path: apps/extension/yigora-extension-demo.zip
+          retention-days: 14
 
   secrets:
     name: Escaneo de secretos

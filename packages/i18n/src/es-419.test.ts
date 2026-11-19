@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { esCR } from "./es-CR";
+import { es419 } from "./es-419";
 
 function collectStrings(value: unknown, path: string[] = []): Array<[string, string]> {
   if (typeof value === "string") {
@@ -11,9 +11,9 @@ function collectStrings(value: unknown, path: string[] = []): Array<[string, str
   throw new TypeError(`Valor no permitido en ${path.join(".")}`);
 }
 
-describe("catálogo es-CR", () => {
+describe("catálogo es-419", () => {
   it("no contiene textos vacíos", () => {
-    for (const [key, text] of collectStrings(esCR)) {
+    for (const [key, text] of collectStrings(es419)) {
       expect(text.trim(), key).not.toBe("");
     }
   });

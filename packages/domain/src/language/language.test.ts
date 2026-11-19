@@ -4,6 +4,7 @@ import { baseLanguage, isPriorityLanguage, languageCodeSchema } from "./language
 describe("idiomas", () => {
   it("valida códigos BCP-47 simples", () => {
     expect(languageCodeSchema.safeParse("es-CR").success).toBe(true);
+    expect(languageCodeSchema.safeParse("es-419").success).toBe(true);
     expect(languageCodeSchema.safeParse("de").success).toBe(true);
     expect(languageCodeSchema.safeParse("Spanish").success).toBe(false);
   });

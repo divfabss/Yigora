@@ -64,7 +64,11 @@
   (`₡1.500`, `1 500,00`, `1,500.00`) y detección de ambigüedad.
 - El parseo ocurre solo en el servidor; la validación en el navegador es únicamente de experiencia de usuario.
 
-## 6. Protección de datos personales (Costa Rica)
+## 6. Protección de datos personales (Latinoamérica)
+
+Mercado: Latinoamérica. Cada país tiene su propia ley (p. ej. LGPD en Brasil, LFPDPPP en México, Ley
+25.326 en Argentina, Ley 1581 en Colombia); los principios aplicados aquí (minimización, no almacenar
+conversaciones, datos sensibles de salud) son comunes. País piloto: Costa Rica.
 
 Referencia: **Ley 8968** (Protección de la Persona frente al Tratamiento de sus Datos Personales) y su
 reglamento; autoridad: PRODHAB. _Este documento no constituye asesoría legal; se recomienda revisión por un
@@ -85,6 +89,18 @@ profesional en derecho costarricense antes de un piloto con datos reales._
   la plataforma (acceso, rectificación y eliminación desde el dashboard o por solicitud).
 - Evaluar con asesoría legal si corresponde inscripción de bases de datos ante PRODHAB y las implicaciones
   regulatorias sanitarias para farmacias.
+
+## 6.1 Extensión en modo demostración
+
+- Incluye solo datos ficticios; no contiene claves, URLs de backend ni credenciales.
+- Permisos: `storage` y acceso a `https://web.whatsapp.com/*`. Nada más.
+- Las conversaciones viven solo en memoria del service worker; en `chrome.storage` solo se guardan la
+  posición de la ventana y el estado de pausa.
+- Prueba estática (`apps/extension/src/security/no-whatsapp-writes.test.ts`): el código no puede usar
+  `click()`, `dispatchEvent`, `execCommand`, eventos sintéticos, desplazamiento, `innerHTML` ni `eval`; el
+  lector de WhatsApp no puede mutar el DOM. Prueba E2E: tras usar la extensión, la caja de redacción de
+  WhatsApp sigue vacía y no hubo interacciones.
+- Mensajes internos validados con Zod y origen verificado (`sender.id`, `sender.url`).
 
 ## 7. Condiciones de uso de WhatsApp
 

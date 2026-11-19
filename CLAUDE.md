@@ -1,7 +1,8 @@
 # CLAUDE.md — Yigora · Instrucciones principales del proyecto
 
-> **Estado:** Fase 1 (fundación) implementada. Existen: monorepo, BD con RLS, `domain`, `ui`, `i18n` y la web
-> base. **Aún no existen** la extensión, el motor de sugerencias, la IA ni el importador. No asumir que algo
+> **Estado:** Fase 1 + demo de la extensión. Existen: monorepo, BD con RLS, `domain`, `ui`, `i18n`, web base,
+> motor de sugerencias determinista, farmacia ficticia y extensión MV3 (modo demostración local).
+> **Aún no existen** la IA, el importador, el dashboard ni la conexión extensión ↔ API. No asumir que algo
 > existe porque aparece en la documentación: verificar siempre el código.
 
 ## 1. Visión del producto
@@ -15,7 +16,8 @@ Producto de pago: el acceso lo concede el propietario (solo por invitación).
 - Sugiere una respuesta **en el idioma del cliente**, basada **solo** en datos verificables de la base de datos.
 - **Nunca envía mensajes.** El vendedor revisa, copia y decide.
 
-Mercado inicial: Costa Rica. Primer sector: farmacias. Arquitectura **multiempresa** desde el inicio.
+Mercado: **Latinoamérica** (primer país piloto: Costa Rica). Primer sector: farmacias. Arquitectura
+**multiempresa** desde el inicio; país, moneda y zona horaria se configuran por empresa.
 
 ## 2. Arquitectura (resumen)
 
@@ -30,7 +32,8 @@ Monorepo pnpm. Detalle en `docs/ARCHITECTURE.md`.
 | `packages/ai`                | Interfaz `LlmProvider` + adaptadores (Anthropic `claude-haiku-5-5`, mock), presupuesto de tokens   |
 | `packages/importer`          | Parseo seguro XLSX/CSV, mapeo, validación y cálculo de diferencias                                 |
 | `packages/ui`                | Sistema de diseño (tokens + componentes shadcn/ui)                                                 |
-| `packages/i18n`              | Catálogo de textos de interfaz es-CR                                                               |
+| `packages/i18n`              | Catálogo de textos de interfaz es-419 (español latinoamericano neutro)                             |
+| `packages/demo-data`         | Farmacia ficticia para la demo y las pruebas                                                       |
 | `supabase/`                  | Migraciones versionadas, seed ficticio, pruebas RLS (pgTAP)                                        |
 
 ## 3. Stack (aprobado)
@@ -67,7 +70,7 @@ Zod · Vitest · Playwright · Vite (extensión) · pnpm workspaces. Ver `docs/D
 
 ## 6. Convenciones
 
-- Código e identificadores en inglés; textos de interfaz y documentación en español (Costa Rica).
+- Código e identificadores en inglés; textos de interfaz y documentación en español latinoamericano neutro.
 - Idiomas con códigos BCP-47 (`es`, `en`, `pt`, `fr`, `de`, `it`). Moneda por defecto `CRC`.
 - Commits: Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `db:`, `sec:`).
 - Ramas: `feat/<tema>`, `fix/<tema>`; integración a `main` mediante PR revisado.
@@ -93,8 +96,9 @@ pnpm build && pnpm test:e2e
 | `docs/PROJECT_STATUS.md` | Estado, roadmap, riesgos, deuda técnica, próximas tareas                               |
 | `docs/DECISIONS.md`      | Registro de decisiones arquitectónicas (ADR)                                           |
 | `docs/CHANGELOG.md`      | Historial de cambios                                                                   |
+| `docs/DEMO.md`           | Cómo instalar y probar la demo de la extensión                                         |
 
 ## 9. Estado general
 
-Fase 1 implementada en `feat/foundation`, pendiente de revisión. Siguiente: Fase 2 (interfaz).
-Ver `docs/PROJECT_STATUS.md`.
+Demo 0.1.0 de la extensión lista (ver `docs/DEMO.md`). Siguiente: Fase 2 (landing, acceso por invitación,
+dashboard) y Fase 3 (importación de inventario). Ver `docs/PROJECT_STATUS.md`.

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("la página principal carga en español con la marca Yigora", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("html")).toHaveAttribute("lang", "es-CR");
+  await expect(page.locator("html")).toHaveAttribute("lang", "es-419");
   await expect(page.getByText("Yigora", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Yigora está en construcción" })).toBeVisible();
 });

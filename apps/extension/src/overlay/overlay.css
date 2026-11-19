@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "@yigora/ui/styles/theme.css";
+
+@source "../../../../packages/ui/src";
+
+body {
+  background: var(--color-background);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  font-size: 14px;
+}

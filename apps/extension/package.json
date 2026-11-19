@@ -1,0 +1,34 @@
+{
+  "name": "@yigora/extension",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build && vite build -c vite.content.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e": "playwright test --trace off",
+    "package": "node scripts/package.mjs"
+  },
+  "dependencies": {
+    "@yigora/demo-data": "workspace:*",
+    "@yigora/domain": "workspace:*",
+    "@yigora/i18n": "workspace:*",
+    "@yigora/suggestion-engine": "workspace:*",
+    "@yigora/ui": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/chrome": "^0.3.7",
+    "@types/jsdom": "^30.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "jsdom": "^31.0.1",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
+  }
+}

@@ -125,3 +125,38 @@ consideran aceptadas (ADR-001, 002, 003, 006, 008, 009, 010 y las recomendacione
   `Permissions-Policy`), variables de entorno validadas sin revelar valores, y logger con lista blanca de
   campos.
 - **Consecuencias:** las páginas deben renderizarse dinámicamente para recibir el nonce.
+
+## ADR-016 — Modo demostración local en la extensión
+
+- **Estado:** Aceptada (2026-11-19)
+- **Contexto:** el propietario pidió una demo para probar cuanto antes. La web todavía no tiene
+  autenticación ni API de sugerencias, y no hay proyecto de Supabase en la nube.
+- **Alternativas:** esperar a tener backend desplegado; demo solo con capturas; motor local en la extensión.
+- **Decisión:** el service worker ejecuta `@yigora/suggestion-engine` con `@yigora/demo-data` (farmacia
+  ficticia) detrás de la interfaz `SuggestionService`. No hay credenciales ni datos reales en la extensión.
+- **Consecuencias:** la demo funciona sin servidor. En producción, `SuggestionService` se implementará
+  llamando a `/api/v1/suggestions` con la sesión del usuario; el resto de la extensión no cambia. El motor
+  es el mismo código en ambos casos.
+
+## ADR-017 — Mercado Latinoamérica
+
+- **Estado:** Aceptada (decisión del propietario, 2026-11-19)
+- **Decisión:** la interfaz usa español latinoamericano neutro (`es-419`); país (`country_code`), zona
+  horaria (`timezone`) y moneda (`default_currency`) son configurables por empresa. Costa Rica es el país
+  piloto y el valor por defecto.
+- **Consecuencias:** los precios se formatean según el idioma de respuesta y la moneda del producto; en la
+  extensión, "hoy" se calcula con la hora local del equipo del vendedor. Región de Supabase pendiente
+  (ver `PROJECT_STATUS.md`, D6).
+
+## ADR-018 — Dependencias de la extensión y del motor
+
+- **Estado:** Aceptada
+
+| Dependencia                                           | Dónde           | Motivo                                                                     |
+| ----------------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
+| `vite` 8, `@vitejs/plugin-react`, `@tailwindcss/vite` | extension       | Compilar la ventana flotante, el service worker y el content script (IIFE) |
+| `@types/chrome`                                       | extension       | Tipos de las APIs de extensiones                                           |
+| `jsdom`                                               | extension (dev) | Pruebas del lector de WhatsApp sobre una réplica del DOM                   |
+| `react`, `zod`, paquetes internos                     | extension       | Interfaz y validación de mensajes internos                                 |
+
+El motor de sugerencias y la farmacia ficticia no agregan dependencias externas.
