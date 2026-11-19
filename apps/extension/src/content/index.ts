@@ -1,11 +1,13 @@
 import {
   backgroundToContentSchema,
   PAUSE_STORAGE_KEY,
-  POSITION_STORAGE_KEY,
+  LAYOUT_STORAGE_KEY,
   type ContentMessage,
+  type ReaderDiagnostics,
 } from "../shared/messages";
 import { logDiagnostic } from "../shared/diagnostics";
-import { mountOverlay, type OverlayPosition } from "./overlay-host/mount-overlay";
+import { restoreLayout } from "./overlay-host/layout";
+import { mountOverlay } from "./overlay-host/mount-overlay";
 import { watchConversation } from "./whatsapp/watch-conversation";
 
 /**
@@ -17,6 +19,11 @@ function createSessionId(): string {
   return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+/** Diagnóstico en formato plano para la consola (sin contenido de mensajes). */
+function flatten(diagnostics: ReaderDiagnostics): Record<string, string | number | boolean> {
+  return { ...diagnostics, dateSample: diagnostics.dateSample ?? "" };
+}
+
 function send(message: ContentMessage): void {
   chrome.runtime.sendMessage(message).catch(() => {
     // El service worker puede estar reiniciándose; la próxima lectura reintenta.
@@ -25,16 +32,15 @@ function send(message: ContentMessage): void {
 
 async function start(): Promise<void> {
   const sessionId = createSessionId();
-  const stored = await chrome.storage.local.get([PAUSE_STORAGE_KEY, POSITION_STORAGE_KEY]);
+  const stored = await chrome.storage.local.get([PAUSE_STORAGE_KEY, LAYOUT_STORAGE_KEY]);
   let paused = stored[PAUSE_STORAGE_KEY] === true;
-  const position = (stored[POSITION_STORAGE_KEY] as OverlayPosition | undefined) ?? null;
 
   const overlay = mountOverlay({
     doc: document,
     iframeUrl: `${chrome.runtime.getURL("overlay.html")}#${sessionId}`,
-    initialPosition: position,
-    onPositionChange: (next) => {
-      void chrome.storage.local.set({ [POSITION_STORAGE_KEY]: next });
+    initialLayout: restoreLayout(stored[LAYOUT_STORAGE_KEY], window),
+    onLayoutChange: (next) => {
+      void chrome.storage.local.set({ [LAYOUT_STORAGE_KEY]: next });
     },
   });
 
@@ -43,13 +49,16 @@ async function start(): Promise<void> {
   const watcher = watchConversation({
     doc: document,
     isPaused: () => paused,
-    onSnapshot: (snapshot) => {
-      logDiagnostic("chat leído", { mensajesDeHoy: snapshot.messages.length });
-      send({ type: "reader.snapshot", sessionId, snapshot });
+    onSnapshot: (snapshot, diagnostics) => {
+      logDiagnostic("chat leído", {
+        mensajesDeHoy: snapshot.messages.length,
+        ...flatten(diagnostics),
+      });
+      send({ type: "reader.snapshot", sessionId, snapshot, diagnostics });
     },
-    onStatus: (status) => {
-      logDiagnostic("estado de lectura", { estado: status });
-      send({ type: "reader.status", sessionId, status });
+    onStatus: (status, diagnostics) => {
+      logDiagnostic("estado de lectura", { estado: status, ...flatten(diagnostics) });
+      send({ type: "reader.status", sessionId, status, diagnostics });
     },
   });
 

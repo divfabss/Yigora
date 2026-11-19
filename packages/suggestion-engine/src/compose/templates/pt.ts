@@ -2,6 +2,7 @@ import { inParentheses, type ReplyTemplates, withPrice } from "./types";
 
 export const portugueseTemplates: ReplyTemplates = {
   greeting: "Olá! Será um prazer ajudar. Qual produto você procura?",
+  greetingPrefix: "Olá!",
   thanks: "Por nada! Estamos à disposição.",
   clarify: "Olá! Poderia nos dizer qual produto você procura para podermos ajudar?",
   notFound:

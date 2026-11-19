@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Yigora — Asistente de ventas (demo)",
   "short_name": "Yigora",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Asistente de ventas para WhatsApp Web. Sugiere respuestas con datos del inventario. Nunca envía mensajes.",
   "minimum_chrome_version": "116",
   "permissions": ["storage"],

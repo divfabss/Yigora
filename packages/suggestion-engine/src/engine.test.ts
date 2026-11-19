@@ -37,7 +37,7 @@ describe("motor de sugerencias", () => {
     expect(result.intent).toBe("availability");
     expect(result.products[0]?.name).toBe("Loratadina 10 mg");
     expect(result.reply).toMatch(
-      /^Sí, tenemos Loratadina 10 mg disponible a ₡\s?2[.,\s\u00a0]?500\./u,
+      /^¡Hola! Sí, tenemos Loratadina 10 mg disponible a ₡\s?2[.,\s\u00a0]?500\./u,
     );
     expect(result.reply).toContain("¿Desea que se lo apartemos?");
   });
@@ -155,6 +155,27 @@ describe("motor de sugerencias", () => {
     const result = await analyze([incoming("tienen ibuprofeno?"), outgoing("Sí, tenemos")]);
     expect(result.awaitingCustomer).toBe(true);
     expect(result.customerText).toBe("tienen ibuprofeno?");
+  });
+
+  it("entiende varios mensajes seguidos del cliente como una sola consulta", async () => {
+    const result = await analyze([
+      incoming("Hola, buenos días."),
+      incoming("Me gustaría consultar por medicamentos para el dolor de cabeza."),
+    ]);
+    expect(result.customerText).toBe(
+      "Hola, buenos días.\nMe gustaría consultar por medicamentos para el dolor de cabeza.",
+    );
+    expect(result.intent).toBe("recommendation_by_need");
+    expect(result.products[0]?.name).toBe("Acetaminofén 500 mg");
+    expect(result.reply).toMatch(
+      /^¡Hola!\nPara eso tenemos estas opciones:\n• Acetaminofén 500 mg/,
+    );
+    expect(result.summaryEs).toBe("Busca un producto para una necesidad: dolor de cabeza");
+  });
+
+  it("no duplica el saludo cuando la respuesta ya saluda", async () => {
+    const result = await analyze([incoming("Hola")]);
+    expect(result.reply.match(/Hola/g)).toHaveLength(1);
   });
 
   it("relaciona preguntas de seguimiento con el producto mencionado antes", async () => {

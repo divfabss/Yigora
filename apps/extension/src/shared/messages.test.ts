@@ -7,6 +7,7 @@ describe("contratos de mensajería", () => {
       type: "reader.snapshot",
       sessionId: "abcdefgh12345678",
       snapshot: { chatKey: "a1b2c3d4", messages: [{ direction: "incoming", text: "Hola" }] },
+      diagnostics: { panelFound: true, messageNodes: 1, withDate: 1, today: 1, dateSample: null },
     };
     expect(contentMessageSchema.safeParse(message).success).toBe(true);
   });
@@ -41,6 +42,23 @@ describe("contratos de mensajería", () => {
     expect(overlayMessageSchema.safeParse({ type: "reply.language", language: "xx" }).success).toBe(
       false,
     );
+  });
+
+  it("rechaza diagnósticos que intenten incluir contenido con caracteres no permitidos", () => {
+    const diagnostics = {
+      panelFound: true,
+      messageNodes: 1,
+      withDate: 0,
+      today: 0,
+      dateSample: "<b>x</b>",
+    };
+    const message = {
+      type: "reader.status",
+      sessionId: "abcdefgh12345678",
+      status: "unreadable",
+      diagnostics,
+    };
+    expect(contentMessageSchema.safeParse(message).success).toBe(false);
   });
 
   it("rechaza tipos de mensaje desconocidos (p. ej. intentos de enviar mensajes)", () => {

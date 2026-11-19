@@ -4,6 +4,8 @@
  */
 export interface ReplyTemplates {
   readonly greeting: string;
+  /** Saludo breve que antecede la respuesta cuando el cliente saludó. */
+  readonly greetingPrefix: string;
   readonly thanks: string;
   readonly clarify: string;
   readonly notFound: string;

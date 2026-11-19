@@ -251,6 +251,14 @@ La estabilidad real se medirá con una cuenta de prueba en la Fase 6.
   - El content script corre en un mundo aislado con su propia CSP (documentación oficial de Chrome).
   - Chrome detiene el service worker tras 30 s sin eventos: la ventana envía `overlay.ping` cada 20 s.
   - La página cambia constantemente; el observador usa _throttle_ (máx. una lectura cada 700 ms).
+- **Fecha de los mensajes (0.2.0):** se interpreta `data-pre-plain-text` (numérica o con nombre de mes en
+  6 idiomas); si falta, se usan los separadores de día ("HOY", "AYER", fechas) y, en último caso, la
+  fecha del mensaje anterior. El lector devuelve un diagnóstico sin contenido (`ReaderDiagnostics`).
+- **Conversación (0.2.0):** el service worker analiza toda la conversación como un solo contexto; los
+  mensajes agregados a mano se acumulan (`conversation.add`) hasta `conversation.clear`. En el mismo chat,
+  lo agregado a mano tiene prioridad sobre la lectura automática hasta que se limpie.
+- **Ventana (0.2.0):** posición, tamaño y fijado (`OverlayLayout`) en `chrome.storage.local`; arrastre y
+  cambio de tamaño con captura de puntero sobre elementos propios del anfitrión.
 - **Permisos:** `storage`; `host_permissions` para `https://web.whatsapp.com/*` y el origen del API. Nada más.
 - **Acceso:** la extensión no funciona sin una sesión de un usuario con acceso concedido (ver §10).
 

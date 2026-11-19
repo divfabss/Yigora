@@ -4,7 +4,7 @@ import { formatPrice } from "./compose/format-price";
 import { sellerTips, summarizeForSeller } from "./compose/seller-summary";
 import { NUMBER_LOCALES, REPLY_TEMPLATES } from "./compose/templates";
 import { extractCustomerTurn } from "./conversation";
-import { classifyIntent } from "./intent/classify-intent";
+import { classifyIntent, hasGreeting } from "./intent/classify-intent";
 import { detectLanguage } from "./language/detect-language";
 import { normalizeMessage, tokenize } from "./text/tokenize";
 import type {
@@ -166,7 +166,13 @@ export function createSuggestionEngine({
     const formatProductPrice = (product: ProductSuggestion) =>
       product.price === null ? null : formatPrice(product.price, product.currency, locale);
     const templates = REPLY_TEMPLATES[replyLanguage];
-    const composed = composeReply({ intent, products, templates, formatProductPrice });
+    const composed = composeReply({
+      intent,
+      products,
+      templates,
+      formatProductPrice,
+      customerGreeted: hasGreeting(normalizedText),
+    });
     const sources = products.flatMap((product) => [
       product.name,
       formatProductPrice(product) ?? "",

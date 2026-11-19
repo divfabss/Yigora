@@ -55,19 +55,30 @@ describe("readOpenChat", () => {
         messages: [{ direction: "incoming", text: "Hola", date: today }],
       }),
     );
-    expect(readOpenChat(doc, now)).toEqual({ status: "group" });
+    expect(readOpenChat(doc, now).status).toBe("group");
   });
 
   it("indica que no hay chat abierto", () => {
-    expect(readOpenChat(load("<div id='side'></div>"), now)).toEqual({ status: "no_chat" });
+    expect(readOpenChat(load("<div id='side'></div>"), now).status).toBe("no_chat");
+  });
+
+  it("lee un chat vacío (solo el aviso de cifrado) sin falsa alarma", () => {
+    const doc = load(
+      "<div id='main'><div role='row'><span>Los mensajes están cifrados de extremo a extremo.</span></div></div>",
+    );
+    const result = readOpenChat(doc, now);
+    expect(result.status === "reading" && result.snapshot.messages).toEqual([]);
   });
 
   it("detecta cuando la estructura de WhatsApp cambió y no se puede leer", () => {
     expect(
-      readOpenChat(load("<div id='main'><div class='nuevo-formato'>Hola</div></div>"), now),
-    ).toEqual({
-      status: "unreadable",
-    });
+      readOpenChat(
+        load(
+          "<div id='main'><div role='row'><div class='nuevo-formato'>Hola, tienen ibuprofeno?</div></div></div>",
+        ),
+        now,
+      ).status,
+    ).toBe("unreadable");
   });
 
   it("no modifica el documento al leer", () => {
@@ -110,7 +121,7 @@ describe("readOpenChat con variantes reales de WhatsApp", () => {
     const rows =
       row("false_1@lid_A", stamp("Ana"), `<span class="selectable-text">Hola</span>`) +
       row("false_1@lid_B", stamp("Beto"), `<span class="selectable-text">Buenas</span>`);
-    expect(readOpenChat(wrap(rows), now)).toEqual({ status: "group" });
+    expect(readOpenChat(wrap(rows), now).status).toBe("group");
   });
 
   it("usa las clases de dirección si el data-id cambia de formato", () => {
@@ -138,5 +149,65 @@ describe("detección de grupos sin falsos positivos", () => {
       </div>`,
     );
     expect(readOpenChat(doc, now).status).toBe("reading");
+  });
+});
+
+describe("fechas difíciles y separadores de día", () => {
+  const msg = (id: string, stamp: string | null, text: string) =>
+    `<div role="row"><div data-id="${id}">${
+      stamp === null
+        ? `<span class="selectable-text">${text}</span>`
+        : `<div class="copyable-text" data-pre-plain-text="${stamp}"><span class="selectable-text">${text}</span></div>`
+    }</div></div>`;
+  const divider = (text: string) =>
+    `<div role="row"><div><span dir="auto">${text}</span></div></div>`;
+  const read = (rows: string) => {
+    const result = readOpenChat(load(`<div id="main">${rows}</div>`), now);
+    return result.status === "reading"
+      ? result.snapshot.messages.map((m) => m.text)
+      : result.status;
+  };
+
+  it("entiende fechas con nombre de mes y espacios especiales", () => {
+    expect(
+      read(msg("false_1@c.us_A", "[10:00\u202fa.\u00a0m., 19 nov 2026] Ana: ", "hola")),
+    ).toEqual(["hola"]);
+    expect(read(msg("false_1@c.us_A", "[10:00 AM, Nov 19, 2026] Ana: ", "hello"))).toEqual([
+      "hello",
+    ]);
+  });
+
+  it("usa los separadores HOY/AYER cuando el mensaje no trae fecha", () => {
+    const rows =
+      divider("AYER") +
+      msg("false_1@c.us_A", null, "viejo") +
+      divider("HOY") +
+      msg("false_1@c.us_B", null, "nuevo");
+    expect(read(rows)).toEqual(["nuevo"]);
+  });
+
+  it("hereda la fecha del mensaje anterior (p. ej. mensajes solo con emojis)", () => {
+    const rows =
+      msg("false_1@c.us_A", `[10:00, ${today}] Ana: `, "hola") +
+      msg("false_1@c.us_B", null, "necesito curitas");
+    expect(read(rows)).toEqual(["hola", "necesito curitas"]);
+  });
+
+  it("informa un diagnóstico sin contenido cuando no reconoce las fechas", () => {
+    const result = readOpenChat(
+      load(
+        `<div id="main">${msg("false_1@c.us_A", "[10:00, formato raro] Ana: ", "secreto")}</div>`,
+      ),
+      now,
+    );
+    expect(result.diagnostics).toEqual({
+      panelFound: true,
+      messageNodes: 1,
+      withDate: 0,
+      today: 0,
+      dateSample: "formato raro",
+    });
+    expect(JSON.stringify(result.diagnostics)).not.toContain("secreto");
+    expect(JSON.stringify(result.diagnostics)).not.toContain("Ana");
   });
 });

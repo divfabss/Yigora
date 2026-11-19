@@ -4,6 +4,23 @@ Formato basado en "Keep a Changelog". Categorías: Funcionalidades, Arquitectura
 
 ## [Sin publicar]
 
+### Demo 0.2.0 de la extensión (2026-11-19) — lectura, contexto e interfaz
+
+- **Lectura de chats (corregido):** fechas con nombre de mes ("19 nov 2026", "Nov 19, 2026"), espacios
+  especiales y fecha antes de la hora; separadores de día ("HOY", "AYER", fechas); mensajes sin fecha
+  heredan la del anterior; un chat vacío ya no aparece como "no se pudo leer".
+- **Diagnóstico visible:** si la lectura no encuentra mensajes de hoy, la ventana muestra conteos y el
+  formato de fecha no reconocido (sin contenido de mensajes).
+- **Contexto:** los mensajes seguidos del cliente se muestran y analizan como un solo bloque; la
+  respuesta saluda si el cliente saludó; más frases de necesidad ("medicamentos para", "consultar por"…).
+- **Interfaz:** conversación arriba y sugerencias abajo; agregar mensajes a mano (Enter) con campo que se
+  vacía solo y que se suman a la conversación; botón **Limpiar**; menos elementos (sin aviso de
+  traducción pendiente, sin descripciones de productos, sugerencias integradas al inventario).
+- **Ventana:** tamaño ajustable desde la esquina, botón para **fijarla** (bloquea mover y redimensionar);
+  posición, tamaño y fijado se recuerdan.
+- **Pruebas:** 7 E2E de la extensión (incluida WhatsApp Web real), nuevas unitarias de fechas, separadores,
+  diseño de la ventana y contexto.
+
 ### Demo 0.1.1 de la extensión (2026-11-19) — corrección: la ventana no aparecía
 
 - **Corregido:** la ventana flotante quedaba oculta detrás de la interfaz de WhatsApp Web (faltaba

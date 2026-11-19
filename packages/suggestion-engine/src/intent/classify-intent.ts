@@ -36,6 +36,11 @@ function classifyProductQuestion(
  * Clasifica la intención principal del cliente combinando frases clave y productos encontrados.
  * Orden de prioridad: precio > información de uso > necesidad/disponibilidad > agradecimiento > saludo.
  */
+/** ¿El cliente saludó en algún mensaje del turno? */
+export function hasGreeting(normalizedText: string): boolean {
+  return detectSignals(normalizedText).has("greeting");
+}
+
 export function classifyIntent(normalizedText: string, matches: readonly ProductMatch[]): Intent {
   const signals = detectSignals(normalizedText);
   if (signals.has("price")) {

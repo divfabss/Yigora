@@ -38,14 +38,17 @@ function ProductItem({ product }: { product: ProductSuggestion }) {
       <div className="flex flex-wrap gap-1">
         <StockBadges product={product} />
       </div>
-      {product.description && (
-        <p className="line-clamp-2 text-xs text-muted-foreground">{product.description}</p>
-      )}
     </li>
   );
 }
 
-export function ProductList({ products }: { products: readonly ProductSuggestion[] }) {
+export function ProductList({
+  products,
+  tips,
+}: {
+  products: readonly ProductSuggestion[];
+  tips: readonly string[];
+}) {
   const t = messages.overlay;
   return (
     <Section title={t.products}>
@@ -55,6 +58,16 @@ export function ProductList({ products }: { products: readonly ProductSuggestion
         <ul className="divide-y">
           {products.slice(0, MAX_VISIBLE).map((product) => (
             <ProductItem key={product.id} product={product} />
+          ))}
+        </ul>
+      )}
+      {tips.length > 0 && (
+        <ul
+          className="mt-2 flex flex-col gap-0.5 border-t pt-2 text-xs text-muted-foreground"
+          data-testid="tips"
+        >
+          {tips.map((tip) => (
+            <li key={tip}>💡 {tip}</li>
           ))}
         </ul>
       )}

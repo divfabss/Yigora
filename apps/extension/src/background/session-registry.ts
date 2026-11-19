@@ -9,6 +9,8 @@ export interface Session {
   tabId: number | null;
   chatKey: string | null;
   messages: readonly ConversationMessage[] | null;
+  /** Conversación de WhatsApp que el vendedor limpió (no se vuelve a mostrar hasta que cambie). */
+  clearedSignature: string | null;
   state: OverlayState;
   port: chrome.runtime.Port | null;
 }
@@ -22,6 +24,7 @@ export function createSessionRegistry() {
       session = {
         tabId: null,
         chatKey: null,
+        clearedSignature: null,
         messages: null,
         state: INITIAL_OVERLAY_STATE,
         port: null,

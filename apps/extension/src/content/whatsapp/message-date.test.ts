@@ -27,3 +27,16 @@ describe("isMessageFromToday", () => {
     expect(isMessageFromToday("[10:32] Nombre: ", now)).toBeNull();
   });
 });
+
+describe("formatos adicionales de fecha", () => {
+  it.each([
+    "[10:32, 19 nov 2026] Nombre: ",
+    "[10:32, 19 de noviembre de 2026] Nombre: ",
+    "[10:32 AM, Nov 19, 2026] Name: ",
+    "[10:32, 19. Nov. 2026] Name: ",
+    "[10:32\u202fa.\u00a0m., 19/11/2026] Nombre: ",
+    "[19/11/2026, 10:32] Nombre: ",
+  ])("reconoce hoy en %s", (stamp) => {
+    expect(isMessageFromToday(stamp, now)).toBe(true);
+  });
+});

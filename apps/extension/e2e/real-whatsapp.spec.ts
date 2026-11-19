@@ -14,17 +14,17 @@ test("la ventana flotante es visible y funciona sobre WhatsApp Web real", async 
   await page.goto("https://web.whatsapp.com/", { waitUntil: "domcontentloaded", timeout: 60_000 });
   const overlay = await overlayFrame(page);
 
-  await expect(overlay.getByText("Abra un chat para comenzar")).toBeVisible({ timeout: 30_000 });
+  await expect(overlay.getByText("Abra un chat para comenzar").first()).toBeVisible({
+    timeout: 30_000,
+  });
   // Espera a que WhatsApp termine de dibujar su interfaz y verifica que la ventana quede encima.
   await page.waitForTimeout(5_000);
   expect(await page.evaluate(() => document.elementFromPoint(150, 500)?.tagName)).toBe(
     "YIGORA-ASSISTANT",
   );
 
-  await overlay.getByText("Pegar mensaje del cliente").click();
-  await overlay
-    .getByLabel("Pegar mensaje del cliente")
-    .fill("Hi! Do you have anything for allergies?");
-  await overlay.getByRole("button", { name: "Analizar" }).click();
+  const input = overlay.getByLabel("Escriba o pegue un mensaje del cliente…");
+  await input.fill("Hi! Do you have anything for allergies?");
+  await input.press("Enter");
   await expect(overlay.getByTestId("reply")).toHaveValue(/Loratadina 10 mg/);
 });

@@ -66,7 +66,6 @@ export function ReplyComposer({ reply, language, onLanguageChange }: ReplyCompos
           setCopyState("idle");
         }}
       />
-      <p className="mt-1 text-xs text-muted-foreground">{t.overlay.editableHint}</p>
       {copyState === "failed" && (
         <p className="mt-1 text-xs text-danger">{t.overlay.copyFallback}</p>
       )}

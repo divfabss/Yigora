@@ -5,7 +5,8 @@ import {
   type BackgroundToContent,
 } from "../shared/messages";
 import {
-  handleManual,
+  handleAdd,
+  handleClear,
   handleReplyLanguage,
   handleSnapshot,
   handleStatus,
@@ -51,9 +52,9 @@ chrome.runtime.onMessage.addListener((raw: unknown, sender) => {
   const session = registry.get(parsed.data.sessionId);
   session.tabId = sender.tab?.id ?? null;
   if (parsed.data.type === "reader.snapshot") {
-    void handleSnapshot(session, parsed.data.snapshot, service);
+    void handleSnapshot(session, parsed.data.snapshot, parsed.data.diagnostics, service);
   } else {
-    handleStatus(session, parsed.data.status);
+    handleStatus(session, parsed.data.status, parsed.data.diagnostics);
   }
 });
 
@@ -74,8 +75,10 @@ chrome.runtime.onConnect.addListener((port) => {
       session.port = port;
       publish(session, {});
       tellContent(session, { type: "reader.resend" });
-    } else if (session && message.type === "analyze.manual") {
-      void handleManual(session, message.text, service);
+    } else if (session && message.type === "conversation.add") {
+      void handleAdd(session, message.text, service);
+    } else if (session && message.type === "conversation.clear") {
+      handleClear(session);
     } else if (session && message.type === "reply.language") {
       void handleReplyLanguage(session, message.language, service);
     }

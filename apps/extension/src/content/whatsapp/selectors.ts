@@ -16,6 +16,8 @@ export const WHATSAPP_SELECTORS = {
     "header span[title]",
     "header span[dir='auto']",
   ],
+  /** Filas de la conversación en orden (mensajes y separadores de día como "HOY"). */
+  timelineRow: "[role='row']",
   /** Contenedor de cada mensaje; su data-id empieza con "true_" (saliente) o "false_" (entrante). */
   messageRow: "[data-id]",
   /** Elemento con el texto copiable; su atributo incluye hora, fecha y autor. */

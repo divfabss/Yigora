@@ -6,6 +6,8 @@ export interface ComposeInput {
   readonly products: readonly ProductSuggestion[];
   readonly templates: ReplyTemplates;
   readonly formatProductPrice: (product: ProductSuggestion) => string | null;
+  /** El cliente saludó: la respuesta también saluda (se entiende la conversación como un todo). */
+  readonly customerGreeted?: boolean;
 }
 
 const MAX_OPTIONS = 3;
@@ -99,6 +101,19 @@ function composeSingleProduct(input: ComposeInput): string[] {
  * Nunca inventa precios, existencias ni indicaciones.
  */
 export function composeReply(input: ComposeInput): string {
+  const body = composeBody(input);
+  // La plantilla de aclaración ya saluda; saludo, agradecimiento y aclaración no llevan prefijo.
+  const ownGreeting =
+    ["greeting", "thanks"].includes(input.intent) ||
+    (input.intent === "other" && input.products.length === 0);
+  const greets = input.customerGreeted === true && !ownGreeting;
+  if (!greets) {
+    return body;
+  }
+  return `${input.templates.greetingPrefix}${input.intent === "recommendation_by_need" ? "\n" : " "}${body}`;
+}
+
+function composeBody(input: ComposeInput): string {
   if (input.products.length === 0) {
     const fixed: Partial<Record<Intent, string>> = {
       greeting: input.templates.greeting,

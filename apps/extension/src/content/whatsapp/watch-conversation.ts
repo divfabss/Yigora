@@ -1,12 +1,20 @@
-import type { ChatSnapshot, ReaderStatus } from "../../shared/messages";
+import type { ChatSnapshot, ReaderDiagnostics, ReaderStatus } from "../../shared/messages";
 import { fingerprint } from "./hash";
 import { readOpenChat } from "./read-conversation";
+
+const NO_DIAGNOSTICS: ReaderDiagnostics = {
+  panelFound: false,
+  messageNodes: 0,
+  withDate: 0,
+  today: 0,
+  dateSample: null,
+};
 
 export interface WatchOptions {
   readonly doc: Document;
   readonly isPaused: () => boolean;
-  readonly onSnapshot: (snapshot: ChatSnapshot) => void;
-  readonly onStatus: (status: ReaderStatus) => void;
+  readonly onSnapshot: (snapshot: ChatSnapshot, diagnostics: ReaderDiagnostics) => void;
+  readonly onStatus: (status: ReaderStatus, diagnostics: ReaderDiagnostics) => void;
   readonly now?: () => Date;
   /** Intervalo mínimo entre lecturas. */
   readonly intervalMs?: number;
@@ -29,30 +37,30 @@ export function watchConversation(options: WatchOptions): ConversationWatcher {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let lastRun = 0;
 
-  const emitStatus = (status: ReaderStatus) => {
+  const emitStatus = (status: ReaderStatus, diagnostics: ReaderDiagnostics) => {
     if (status !== lastStatus) {
       lastStatus = status;
-      onStatus(status);
+      onStatus(status, diagnostics);
     }
   };
 
   const evaluate = (force = false) => {
     if (isPaused()) {
       lastSignature = "";
-      emitStatus("paused");
+      emitStatus("paused", NO_DIAGNOSTICS);
       return;
     }
     const result = readOpenChat(doc, now());
     if (result.status !== "reading") {
       lastSignature = "";
-      emitStatus(result.status);
+      emitStatus(result.status, result.diagnostics);
       return;
     }
     const signature = fingerprint(JSON.stringify(result.snapshot));
-    emitStatus("reading");
+    emitStatus("reading", result.diagnostics);
     if (force || signature !== lastSignature) {
       lastSignature = signature;
-      onSnapshot(result.snapshot);
+      onSnapshot(result.snapshot, result.diagnostics);
     }
   };
 

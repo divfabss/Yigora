@@ -133,11 +133,14 @@ su estabilidad real solo se confirmará con una cuenta de prueba en la Fase 6.
   Causa de que no se detectara antes: la réplica de pruebas no tenía capas con `z-index`. Ahora existe
   una prueba E2E contra WhatsApp Web real (pantalla de inicio de sesión).
 
+- 0.1.1 → 0.2.0: la lectura no funcionaba con sesión iniciada (probable causa: formatos de fecha no
+  reconocidos y mensajes sin fecha); mejoras de interfaz pedidas por el propietario (orden, Limpiar,
+  ventana ajustable y fijable) y entendimiento de la conversación completa.
+
 ## Errores conocidos
 
-Ninguno conocido. La ventana y su funcionamiento se validaron sobre WhatsApp Web real (sin sesión); la
-lectura de mensajes de un chat abierto solo se ha validado contra la réplica, porque requiere una
-cuenta con sesión iniciada.
+Pendiente de confirmar por el propietario: lectura automática en un chat real con sesión iniciada
+(0.2.0). Si falla, el recuadro "Diagnóstico de lectura" indica qué ajustar.
 
 ## Próximas tareas
 
