@@ -28,15 +28,26 @@ export const test = base.extend<ExtensionFixtures>({
       mkdtempSync(join(tmpdir(), "yigora-e2e-")),
       {
         headless: true,
+        // Las extensiones requieren Chromium completo: el "headless shell" de Playwright no las admite.
         ...(process.env.PLAYWRIGHT_CHROMIUM_PATH
           ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH }
-          : {}),
+          : { channel: "chromium" }),
         args: [
           `--disable-extensions-except=${EXTENSION_PATH}`,
           `--load-extension=${EXTENSION_PATH}`,
         ],
       },
     );
+    // Falla con un mensaje claro si la extensión no se cargó, en vez de esperar la ventana flotante.
+    const serviceWorker =
+      context.serviceWorkers()[0] ??
+      (await context.waitForEvent("serviceworker", { timeout: 15_000 }).catch(() => null));
+    if (!serviceWorker) {
+      await context.close();
+      throw new Error(
+        "La extensión no se cargó en Chromium (revise el canal o la ruta del navegador).",
+      );
+    }
     await use(context);
     await context.close();
   },
