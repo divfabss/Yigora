@@ -28,3 +28,7 @@ test-results/
 .idea/
 .claude/settings.local.json
 next-env.d.ts
+
+# Paquetes generados
+*.zip
+apps/extension/dist/

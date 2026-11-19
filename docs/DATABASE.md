@@ -2,7 +2,8 @@
 
 > **Estado:** parcialmente implementado.
 > **Implementado (Fase 1):** `organizations`, `platform_admins`, `profiles`, `memberships`, `products`,
-> `product_keywords`, `audit_log`, helpers de autorización y RLS.
+> `product_keywords`, `audit_log`, helpers de autorización y RLS; país y zona horaria por organización y
+> códigos de idioma con región numérica (`es-419`) (migración 5).
 > **Pendiente:** `import_batches`, `import_rows`, `import_changes` (Fase 3); `ai_usage_events`,
 > `rate_limit_counters`, RPC `search_products` (Fase 4).
 
@@ -13,21 +14,23 @@ Migraciones versionadas en `supabase/migrations/` (Supabase CLI). Pruebas de RLS
 
 ### organizations
 
-| Columna                 | Tipo                             | Notas                                                                            |
-| ----------------------- | -------------------------------- | -------------------------------------------------------------------------------- |
-| id                      | uuid PK                          |                                                                                  |
-| name                    | text not null                    |                                                                                  |
-| slug                    | text unique not null             |                                                                                  |
-| business_type           | text not null                    | `check in ('pharmacy')`, ampliable                                               |
-| knowledge_base_language | text not null default `'es'`     | BCP-47                                                                           |
-| default_currency        | char(3) not null default `'CRC'` |                                                                                  |
-| stale_after_hours       | int not null default 24          | umbral de "información desactualizada"                                           |
-| inventory_version       | bigint not null default 0        | se incrementa en cada cambio de inventario                                       |
-| ai_settings             | jsonb not null default `'{}'`    | modelo, límites; validado con Zod                                                |
-| is_demo                 | boolean not null default false   |                                                                                  |
-| access_status           | text not null default `'active'` | `check in ('active','suspended')`; lo cambia solo el administrador de plataforma |
-| access_expires_at       | timestamptz null                 | fin opcional del periodo de acceso                                               |
-| created_at              | timestamptz                      |                                                                                  |
+| Columna                 | Tipo                                         | Notas                                                                            |
+| ----------------------- | -------------------------------------------- | -------------------------------------------------------------------------------- |
+| id                      | uuid PK                                      |                                                                                  |
+| name                    | text not null                                |                                                                                  |
+| slug                    | text unique not null                         |                                                                                  |
+| business_type           | text not null                                | `check in ('pharmacy')`, ampliable                                               |
+| knowledge_base_language | text not null default `'es'`                 | BCP-47                                                                           |
+| default_currency        | char(3) not null default `'CRC'`             |                                                                                  |
+| stale_after_hours       | int not null default 24                      | umbral de "información desactualizada"                                           |
+| inventory_version       | bigint not null default 0                    | se incrementa en cada cambio de inventario                                       |
+| ai_settings             | jsonb not null default `'{}'`                | modelo, límites; validado con Zod                                                |
+| is_demo                 | boolean not null default false               |                                                                                  |
+| access_status           | text not null default `'active'`             | `check in ('active','suspended')`; lo cambia solo el administrador de plataforma |
+| access_expires_at       | timestamptz null                             | fin opcional del periodo de acceso                                               |
+| country_code            | char(2) not null default `'CR'`              | ISO 3166-1 alfa-2 (migración 5)                                                  |
+| timezone                | text not null default `'America/Costa_Rica'` | zona IANA validada contra PostgreSQL (migración 5)                               |
+| created_at              | timestamptz                                  |                                                                                  |
 
 ### platform_admins
 

@@ -1,15 +1,15 @@
 # Estado del proyecto
 
-_Última actualización: 2026-11-18 — Fase 1 (fundación) implementada, en revisión._
+_Última actualización: 2026-11-19 — Demo 0.1.0 de la extensión lista; Fase 1 en revisión._
 
 ## Resumen
 
-| Área                 | Estado                                                                         |
-| -------------------- | ------------------------------------------------------------------------------ |
-| Repositorio          | `divfabss/yigora`; Fase 1 en la rama `feat/foundation` (PR hacia `main`)       |
-| Documentación base   | Aprobada y sincronizada con el código de la Fase 1                             |
-| Código de aplicación | Fundación: monorepo, BD con RLS, dominio, sistema de diseño, web base          |
-| Pruebas              | 35 unitarias (Vitest) · 44 de BD (pgTAP) · 5 E2E (Playwright) — todas en verde |
+| Área                 | Estado                                                                   |
+| -------------------- | ------------------------------------------------------------------------ |
+| Repositorio          | `divfabss/yigora`; Fase 1 en la rama `feat/foundation` (PR hacia `main`) |
+| Documentación base   | Aprobada y sincronizada con el código de la Fase 1                       |
+| Código de aplicación | Fundación + motor determinista + extensión MV3 en modo demostración      |
+| Pruebas              | 113 unitarias · 49 pgTAP · 5 E2E web · 3 E2E extensión — todas en verde  |
 
 ## Funcionalidades
 
@@ -28,9 +28,21 @@ _Última actualización: 2026-11-18 — Fase 1 (fundación) implementada, en rev
   clientes Supabase de servidor, logger con lista blanca, `/api/v1/health`, página provisional.
 - CI en GitHub Actions (calidad, BD, E2E, gitleaks) y Dependabot.
 
+### Completadas (demo 0.1.0, verificadas con pruebas)
+
+- Mercado Latinoamérica: interfaz `es-419`; país y zona horaria por empresa (migración 5).
+- `@yigora/suggestion-engine`: detección de idioma (6 idiomas), intención, búsqueda tolerante a errores,
+  preguntas de seguimiento, productos con stock primero, plantillas en 6 idiomas, validador de cifras,
+  sugerencias comerciales para el vendedor. Sin IA.
+- `@yigora/demo-data`: farmacia ficticia de 17 productos con palabras clave en 6 idiomas.
+- `apps/extension`: lectura automática de los mensajes de hoy del chat individual abierto (solo lectura),
+  ventana flotante arrastrable y minimizable, cambio de idioma de respuesta, copiar, pausa y entrada manual.
+  Guía: `docs/DEMO.md`.
+
 ### En desarrollo
 
-- Revisión del PR de la Fase 1.
+- Revisión del PR de la Fase 1 y del PR de la demo.
+- Validación de la lectura de WhatsApp en una cuenta real (comentarios del propietario).
 
 ### Pendientes
 
@@ -71,6 +83,13 @@ Cada fase termina con pruebas verdes, documentación actualizada y revisión del
 | D14 | Revisión legal                                | Recomendada antes de distribuir a clientes                                            |
 | D15 | Nombre del producto                           | **Yigora**                                                                            |
 
+### Región de Supabase (D6)
+
+Para clientes en México, Centroamérica, Caribe y norte de Sudamérica, `us-east-1` (Virginia) suele dar
+menor latencia que `sa-east-1` (São Paulo), que favorece a Brasil y el Cono Sur. Ninguna ley de los
+países considerados exige almacenar los datos en el país, pero conviene confirmarlo con asesoría legal
+antes de elegir. Cambiar de región después requiere migrar la base de datos.
+
 ### Preguntas abiertas menores (con valor por defecto)
 
 - Chats de grupo: **excluidos** por defecto.
@@ -103,13 +122,18 @@ su estabilidad real solo se confirmará con una cuenta de prueba en la Fase 6.
 - `products.last_import_id` no tiene FK todavía; se agrega con `import_batches` en la Fase 3.
 - Acciones de GitHub fijadas por versión mayor, no por SHA.
 - Proyecto de Supabase Cloud aún no creado (requiere elegir región).
+- La extensión aún no tiene sesión de usuario ni llama al API (modo demostración local, ADR-016).
+- El motor determinista no traduce literalmente al español; requiere el adaptador de IA (Fase 5).
+- "Hoy" se calcula con la hora del equipo del vendedor; no usa todavía la zona horaria de la empresa.
 
 ## Errores conocidos
 
-Ninguno.
+Ninguno conocido. La lectura de WhatsApp Web solo se ha validado contra una réplica de su estructura.
 
 ## Próximas tareas
 
-1. Revisar y aprobar el PR de la Fase 1; confirmar que el CI pase en GitHub.
-2. Fase 2: landing de Yigora, inicio de sesión por invitación, dashboard, administración de accesos y
-   demo con ventana flotante simulada.
+1. Propietario prueba la demo (`docs/DEMO.md`) en su WhatsApp Web y reporta si la lectura funciona.
+2. Revisar e integrar el PR de la Fase 1 y luego el de la demo.
+3. Elegir la región de Supabase (D6) para crear el proyecto en la nube.
+4. Fase 2: landing, inicio de sesión por invitación, dashboard y administración de accesos.
+5. Fase 3: importación de inventario (Excel/CSV) y conexión extensión ↔ API.

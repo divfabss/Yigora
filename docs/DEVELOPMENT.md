@@ -27,19 +27,20 @@ La web queda en `http://localhost:3000`.
 
 ## Comandos
 
-| Comando              | Propósito                                                         |
-| -------------------- | ----------------------------------------------------------------- |
-| `pnpm dev`           | Web en modo desarrollo                                            |
-| `pnpm build`         | Compilación de producción de la web                               |
-| `pnpm lint`          | ESLint (capas, ciclos, `any`, tamaño de archivos), 0 advertencias |
-| `pnpm format`        | Formatear con Prettier (`format:check` para verificar)            |
-| `pnpm typecheck`     | TypeScript estricto en todos los paquetes                         |
-| `pnpm test`          | Pruebas unitarias (Vitest, todos los paquetes)                    |
-| `pnpm test:e2e`      | Pruebas end-to-end (Playwright; requiere `pnpm build` antes)      |
-| `pnpm db:start/stop` | Iniciar/detener Supabase local                                    |
-| `pnpm db:reset`      | Recrear la BD local aplicando todas las migraciones               |
-| `pnpm db:test`       | Pruebas pgTAP de seguridad y reglas de datos                      |
-| `pnpm db:lint`       | Revisión estática del esquema SQL                                 |
+| Comando                  | Propósito                                                         |
+| ------------------------ | ----------------------------------------------------------------- |
+| `pnpm dev`               | Web en modo desarrollo                                            |
+| `pnpm build`             | Compilación de producción de la web y de la extensión             |
+| `pnpm package:extension` | Genera `apps/extension/yigora-extension-demo.zip`                 |
+| `pnpm lint`              | ESLint (capas, ciclos, `any`, tamaño de archivos), 0 advertencias |
+| `pnpm format`            | Formatear con Prettier (`format:check` para verificar)            |
+| `pnpm typecheck`         | TypeScript estricto en todos los paquetes                         |
+| `pnpm test`              | Pruebas unitarias (Vitest, todos los paquetes)                    |
+| `pnpm test:e2e`          | E2E de la web y de la extensión (requiere `pnpm build` antes)     |
+| `pnpm db:start/stop`     | Iniciar/detener Supabase local                                    |
+| `pnpm db:reset`          | Recrear la BD local aplicando todas las migraciones               |
+| `pnpm db:test`           | Pruebas pgTAP de seguridad y reglas de datos                      |
+| `pnpm db:lint`           | Revisión estática del esquema SQL                                 |
 
 Si Chromium ya está instalado en otra ruta, `PLAYWRIGHT_CHROMIUM_PATH=/ruta/chromium pnpm test:e2e`.
 
@@ -49,12 +50,24 @@ Si Chromium ya está instalado en otra ruta, `PLAYWRIGHT_CHROMIUM_PATH=/ruta/chr
 apps/web            Next.js 16 (App Router, proxy con CSP, API /api/v1/health)
 packages/domain     Reglas puras: stock, roles/acceso, idiomas, esquemas de producto
 packages/ui         Tokens de diseño (Tailwind v4) y componentes base estilo shadcn/ui
-packages/i18n       Catálogo de textos es-CR
+packages/i18n       Catálogo de textos es-419
+packages/suggestion-engine  Motor de sugerencias (determinista)
+packages/demo-data  Farmacia ficticia
+apps/extension      Extensión MV3 (ventana flotante, lector de WhatsApp)
 supabase/           config.toml, migrations/, tests/ (pgTAP)
 ```
 
-Pendientes de crear en fases posteriores: `apps/extension`, `packages/suggestion-engine`,
-`packages/ai`, `packages/importer`.
+Pendientes de crear en fases posteriores: `packages/ai`, `packages/importer`.
+
+## Extensión
+
+```bash
+pnpm --filter @yigora/extension build
+```
+
+Cargar `apps/extension/dist` en `chrome://extensions` → **Cargar descomprimida**. Las pruebas E2E cargan la
+extensión real en Chromium y sirven una réplica ficticia de WhatsApp Web en `https://web.whatsapp.com/`.
+Los íconos se generan con `node apps/extension/scripts/generate-icons.mjs`. Guía de la demo: `docs/DEMO.md`.
 
 ## Migraciones
 

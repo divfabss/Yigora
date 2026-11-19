@@ -8,19 +8,20 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @yigora/web dev",
-    "build": "pnpm --filter @yigora/web build",
+    "build": "pnpm --filter @yigora/web build && pnpm --filter @yigora/extension build",
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "pnpm --filter @yigora/web test:e2e",
+    "test:e2e": "pnpm --filter @yigora/web test:e2e && pnpm --filter @yigora/extension test:e2e",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
-    "db:lint": "supabase db lint --level warning"
+    "db:lint": "supabase db lint --level warning",
+    "package:extension": "pnpm --filter @yigora/extension build && pnpm --filter @yigora/extension package"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

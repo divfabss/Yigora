@@ -4,6 +4,19 @@ Formato basado en "Keep a Changelog". Categorías: Funcionalidades, Arquitectura
 
 ## [Sin publicar]
 
+### Demo 0.1.0 de la extensión (2026-11-19)
+
+- **Funcionalidades:** extensión MV3 con ventana flotante sobre WhatsApp Web, lectura automática de los
+  mensajes de hoy (solo lectura, sin grupos), motor de sugerencias determinista en 6 idiomas, farmacia
+  ficticia, copiar respuesta, pausa y entrada manual. Guía en `docs/DEMO.md`.
+- **Arquitectura:** nuevos paquetes `@yigora/suggestion-engine` y `@yigora/demo-data`; app
+  `apps/extension` (ADR-016, ADR-018).
+- **Base de datos:** migración `20261119000005` (país, zona horaria, códigos `es-419`).
+- **Mercado:** Latinoamérica; interfaz en `es-419` (ADR-017).
+- **Seguridad:** prueba estática que prohíbe APIs de escritura/clic en la extensión; E2E que verifica que
+  nada se escribe ni se envía en WhatsApp; mensajes internos validados con Zod.
+- **CI:** compila y prueba la extensión y publica el `.zip` de la demo como artefacto.
+
 ### Fase 1 — Fundación (2026-11-18)
 
 - **Arquitectura:** monorepo pnpm (`apps/web`, `packages/domain`, `packages/ui`, `packages/i18n`).

@@ -42,7 +42,7 @@ Principios:
 - **Inversión de dependencias:** `suggestion-engine` e `importer` definen _puertos_ (interfaces); `apps/web`
   inyecta los adaptadores (Supabase, proveedor IA). Esto permite probar el motor sin red ni BD.
 
-## 2. Estructura de carpetas propuesta
+## 2. Estructura de carpetas
 
 ```
 /
@@ -71,7 +71,8 @@ Principios:
 │   ├── ai/                # LlmProvider, adaptadores, presupuesto de tokens, timeouts, reintentos
 │   ├── importer/          # parseo seguro, detección de mapeo, validación, diff
 │   ├── ui/                # tokens de diseño + componentes shadcn/ui compartidos (web y ventana flotante)
-│   ├── i18n/              # catálogo tipado de textos es-CR
+│   ├── i18n/              # catálogo tipado de textos es-419
+│   ├── demo-data/         # farmacia ficticia (demo y pruebas)
 │   └── config/            # tsconfig/eslint compartidos
 ├── supabase/
 │   ├── config.toml · migrations/ · seed.sql · tests/ (pgTAP)
@@ -103,6 +104,11 @@ ui, i18n  ←  apps/web, apps/extension
 | `extension/overlay`              | Mostrar análisis y permitir copiar                                               | Lógica de negocio, acceso al DOM de WhatsApp      |
 
 ## 4. Motor de sugerencias
+
+> **Implementado (modo determinista):** `packages/suggestion-engine`. Normalización, detección de idioma por
+> léxico, intención por frases, búsqueda tolerante a errores (`createInMemoryProductSearch`), preguntas de
+> seguimiento con contexto, plantillas en 6 idiomas y validador de cifras. **Pendiente:** adaptador de IA
+> (traducción literal, idiomas fuera de los 6) y adaptador de búsqueda sobre Supabase.
 
 ### 4.1 Pipeline
 
@@ -159,12 +165,12 @@ habilitadas, plantillas y avisos legales. El núcleo no cambia al agregar un ver
 
 Cuatro conceptos independientes:
 
-| Concepto                          | Origen                                                      | Valor inicial          |
-| --------------------------------- | ----------------------------------------------------------- | ---------------------- |
-| Idioma de la interfaz             | catálogo `packages/i18n`                                    | `es-CR` fijo en el MVP |
-| Idioma de la conversación         | detectado por mensaje (con contexto de mensajes previos)    | automático             |
-| Idioma de la base de conocimiento | `organizations.knowledge_base_language`                     | `es`                   |
-| Idioma de la respuesta sugerida   | por defecto = idioma detectado; el vendedor puede cambiarlo | automático             |
+| Concepto                          | Origen                                                      | Valor inicial           |
+| --------------------------------- | ----------------------------------------------------------- | ----------------------- |
+| Idioma de la interfaz             | catálogo `packages/i18n`                                    | `es-419` fijo en el MVP |
+| Idioma de la conversación         | detectado por mensaje (con contexto de mensajes previos)    | automático              |
+| Idioma de la base de conocimiento | `organizations.knowledge_base_language`                     | `es`                    |
+| Idioma de la respuesta sugerida   | por defecto = idioma detectado; el vendedor puede cambiarlo | automático              |
 
 - **Nombres de productos (D9):** siempre se usa el nombre tal como está en la base de datos, en cualquier
   idioma de respuesta (p. ej. "We currently have Loratadina 10 mg available").
@@ -213,6 +219,14 @@ mantiene detrás del puerto `ConversationSource` para poder sustituirla sin toca
 La estabilidad real se medirá con una cuenta de prueba en la Fase 6.
 
 ## 7. Extensión Chrome (MV3) y ventana flotante
+
+> **Implementado (demo 0.1.0):** `apps/extension`. El motor corre dentro del service worker con la farmacia
+> ficticia (ADR-016). La conexión al API y la sesión por usuario llegarán con la Fase 2.
+>
+> Flujo: content script (lector + anfitrión) → `chrome.runtime.sendMessage` → service worker
+> (`SuggestionService`) → puerto `yigora-overlay` → ventana flotante (iframe). Un `sessionId` aleatorio en el
+> hash del iframe empareja cada pestaña con su ventana. El service worker guarda las conversaciones solo en
+> memoria; si se reinicia, pide al content script que vuelva a leer.
 
 **Decisión del propietario (D3):** ventana flotante sobre WhatsApp Web, con las recomendaciones.
 
