@@ -1,6 +1,6 @@
 # Demo de Yigora: cómo probarla
 
-> Versión de demostración (0.1.0). Usa una **farmacia ficticia** incluida en la extensión: los productos,
+> Versión de demostración (0.1.1). Usa una **farmacia ficticia** incluida en la extensión: los productos,
 > precios y existencias son inventados. No se conecta a ningún servidor ni usa IA todavía.
 
 ## 1. Instalar la extensión en Google Chrome
@@ -64,7 +64,18 @@ Vitamina C · Termómetro digital · Curitas · Gotas lubricantes (stock descono
 - **Riesgo aceptado:** WhatsApp restringe herramientas no oficiales; la extensión solo lee, pero
   recomendamos probar con una cuenta de prueba.
 
-## 6. Desinstalar
+## 6. Si algo no funciona
+
+1. En `chrome://extensions`, verifique que Yigora esté activa y que la versión sea **0.1.1**. Si venía
+   de la 0.1.0, pulse **Quitar** y vuelva a cargar la carpeta nueva (o use el botón de recargar ↻).
+2. **Recargue la pestaña de WhatsApp Web** (F5) después de instalar o actualizar la extensión: las
+   pestañas abiertas antes no reciben la extensión.
+3. Abra las herramientas para desarrolladores (F12) → **Consola** y escriba `Yigora` en el filtro.
+   Debería ver mensajes como `[Yigora] ventana flotante lista` y `[Yigora] estado de lectura`. Estos
+   mensajes nunca incluyen el contenido de las conversaciones. Envíenos una captura de esos mensajes.
+4. En `chrome://extensions`, pulse **Errores** en la tarjeta de Yigora (si aparece) y envíenos una captura.
+
+## 7. Desinstalar
 
 En `chrome://extensions`, pulse **Quitar** en Yigora. La extensión no guarda conversaciones; solo
 recuerda la posición de la ventana y si la lectura está en pausa.

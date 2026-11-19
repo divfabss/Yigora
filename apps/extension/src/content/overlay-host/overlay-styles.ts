@@ -1,8 +1,9 @@
 /** Estilos de la ventana flotante. Viven dentro de un Shadow DOM cerrado: no afectan a WhatsApp. */
 export const OVERLAY_HOST_CSS = `
 :host { all: initial; }
+/* WhatsApp apila su interfaz con z-index propios: la ventana debe quedar siempre encima. */
 .panel {
-  position: fixed; width: 372px; height: min(620px, calc(100vh - 24px));
+  position: fixed; z-index: 2147483647; width: 372px; height: min(620px, calc(100vh - 24px));
   display: flex; flex-direction: column; overflow: hidden;
   background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.12); border-radius: 14px;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
@@ -31,7 +32,7 @@ export const OVERLAY_HOST_CSS = `
 .icon-button:focus-visible, .bubble:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }
 iframe { flex: 1; width: 100%; border: 0; background: #f8f9fc; }
 .bubble {
-  position: fixed; width: 52px; height: 52px; border-radius: 999px; border: 0; cursor: pointer;
+  position: fixed; z-index: 2147483647; width: 52px; height: 52px; border-radius: 999px; border: 0; cursor: pointer;
   background: #3b4fd1; color: #ffffff; font: 700 20px system-ui, sans-serif;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
 }

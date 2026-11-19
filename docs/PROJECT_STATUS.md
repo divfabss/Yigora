@@ -126,9 +126,18 @@ su estabilidad real solo se confirmará con una cuenta de prueba en la Fase 6.
 - El motor determinista no traduce literalmente al español; requiere el adaptador de IA (Fase 5).
 - "Hoy" se calcula con la hora del equipo del vendedor; no usa todavía la zona horaria de la empresa.
 
+## Errores corregidos
+
+- 0.1.0 → 0.1.1: la ventana flotante no se veía en WhatsApp Web real (oculta detrás de su interfaz); la
+  lectura podía no ejecutarse por cambios constantes de la página; la ventana se vaciaba tras 30 s.
+  Causa de que no se detectara antes: la réplica de pruebas no tenía capas con `z-index`. Ahora existe
+  una prueba E2E contra WhatsApp Web real (pantalla de inicio de sesión).
+
 ## Errores conocidos
 
-Ninguno conocido. La lectura de WhatsApp Web solo se ha validado contra una réplica de su estructura.
+Ninguno conocido. La ventana y su funcionamiento se validaron sobre WhatsApp Web real (sin sesión); la
+lectura de mensajes de un chat abierto solo se ha validado contra la réplica, porque requiere una
+cuenta con sesión iniciada.
 
 ## Próximas tareas
 

@@ -243,6 +243,14 @@ La estabilidad real se medirá con una cuenta de prueba en la Fase 6.
 - **Contenido:** estado del asistente, mensaje original, traducción, intención, producto, descripción, precio,
   existencias (con indicador de desactualizado), sugerencia comercial, respuesta recomendada, selector de idioma
   y botón Copiar (`navigator.clipboard.writeText` con gesto del usuario).
+- **Hallazgos verificados contra WhatsApp Web real (2026-11-19):**
+  - WhatsApp apila su interfaz con `z-index`: la ventana y la burbuja usan `z-index: 2147483647`.
+  - WhatsApp envía `Cross-Origin-Embedder-Policy: require-corp` y una CSP con `frame-src` restringido;
+    aun así Chrome carga el iframe de la extensión (recurso de `web_accessible_resources`). Verificado
+    con la prueba `e2e/real-whatsapp.spec.ts`.
+  - El content script corre en un mundo aislado con su propia CSP (documentación oficial de Chrome).
+  - Chrome detiene el service worker tras 30 s sin eventos: la ventana envía `overlay.ping` cada 20 s.
+  - La página cambia constantemente; el observador usa _throttle_ (máx. una lectura cada 700 ms).
 - **Permisos:** `storage`; `host_permissions` para `https://web.whatsapp.com/*` y el origen del API. Nada más.
 - **Acceso:** la extensión no funciona sin una sesión de un usuario con acceso concedido (ver §10).
 

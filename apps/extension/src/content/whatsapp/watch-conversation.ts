@@ -8,7 +8,8 @@ export interface WatchOptions {
   readonly onSnapshot: (snapshot: ChatSnapshot) => void;
   readonly onStatus: (status: ReaderStatus) => void;
   readonly now?: () => Date;
-  readonly debounceMs?: number;
+  /** Intervalo mínimo entre lecturas. */
+  readonly intervalMs?: number;
 }
 
 export interface ConversationWatcher {
@@ -22,10 +23,11 @@ export interface ConversationWatcher {
  * solo cuando el contenido cambia. Únicamente observa: nunca modifica la página.
  */
 export function watchConversation(options: WatchOptions): ConversationWatcher {
-  const { doc, isPaused, onSnapshot, onStatus, now = () => new Date(), debounceMs = 600 } = options;
+  const { doc, isPaused, onSnapshot, onStatus, now = () => new Date(), intervalMs = 700 } = options;
   let lastSignature = "";
   let lastStatus: ReaderStatus | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let lastRun = 0;
 
   const emitStatus = (status: ReaderStatus) => {
     if (status !== lastStatus) {
@@ -54,11 +56,21 @@ export function watchConversation(options: WatchOptions): ConversationWatcher {
     }
   };
 
+  /**
+   * Limitación (throttle), no espera (debounce): WhatsApp cambia la página continuamente
+   * ("en línea", "escribiendo…"); con una espera que se reinicia, la lectura podría no ocurrir nunca.
+   * Así se garantiza una lectura como máximo cada `intervalMs`.
+   */
   const schedule = () => {
-    clearTimeout(timer);
+    if (timer !== undefined) {
+      return;
+    }
+    const wait = Math.max(0, lastRun + intervalMs - Date.now());
     timer = setTimeout(() => {
+      timer = undefined;
+      lastRun = Date.now();
       evaluate();
-    }, debounceMs);
+    }, wait);
   };
 
   const observer = new MutationObserver(schedule);

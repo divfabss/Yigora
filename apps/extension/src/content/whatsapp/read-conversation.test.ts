@@ -79,3 +79,64 @@ describe("readOpenChat", () => {
     expect(doc.documentElement.outerHTML).toBe(before);
   });
 });
+
+describe("readOpenChat con variantes reales de WhatsApp", () => {
+  const wrap = (rows: string) =>
+    load(
+      `<div id="main"><header><span dir="auto" title="Cliente">Cliente</span></header>${rows}</div>`,
+    );
+  const row = (id: string, stamp: string, body: string, extraClass = "") =>
+    `<div role="row"><div data-id="${id}" class="${extraClass}"><div class="copyable-text" data-pre-plain-text="${stamp}">${body}</div></div></div>`;
+  const stamp = (author: string) => `[10:00, ${today}] ${author}: `;
+
+  it("toma el texto de la respuesta y no el del mensaje citado", () => {
+    const body = `<div aria-label="Quoted message"><span class="selectable-text">tienen ibuprofeno?</span></div>
+      <span class="selectable-text"><span>y cuánto cuesta?</span></span>`;
+    const result = readOpenChat(wrap(row("false_1@c.us_A", stamp("Cliente"), body)), now);
+    expect(result.status === "reading" && result.snapshot.messages[0]?.text).toBe(
+      "y cuánto cuesta?",
+    );
+  });
+
+  it("conserva emojis (texto alternativo) y saltos de línea", () => {
+    const body = `<span class="selectable-text"><span>Hola <img alt="👋" /><br />necesito curitas</span></span>`;
+    const result = readOpenChat(wrap(row("false_1@c.us_A", stamp("Cliente"), body)), now);
+    expect(result.status === "reading" && result.snapshot.messages[0]?.text).toBe(
+      "Hola 👋\nnecesito curitas",
+    );
+  });
+
+  it("detecta grupos por la cantidad de autores aunque el identificador no lo indique", () => {
+    const rows =
+      row("false_1@lid_A", stamp("Ana"), `<span class="selectable-text">Hola</span>`) +
+      row("false_1@lid_B", stamp("Beto"), `<span class="selectable-text">Buenas</span>`);
+    expect(readOpenChat(wrap(rows), now)).toEqual({ status: "group" });
+  });
+
+  it("usa las clases de dirección si el data-id cambia de formato", () => {
+    const rows = `<div role="row"><div data-id="nuevo-formato-1" class="message-in"><div class="copyable-text" data-pre-plain-text="${stamp("Cliente")}"><span class="selectable-text">tienen suero?</span></div></div></div>`;
+    const result = readOpenChat(wrap(rows), now);
+    expect(result.status === "reading" && result.snapshot.messages).toEqual([
+      { direction: "incoming", text: "tienen suero?" },
+    ]);
+  });
+
+  it("encuentra el panel con el selector alternativo", () => {
+    const doc = load(
+      `<div data-testid="conversation-panel-wrapper">${row("false_9@c.us_A", stamp("Cliente"), `<span class="selectable-text">Hola</span>`)}</div>`,
+    );
+    expect(readOpenChat(doc, now).status).toBe("reading");
+  });
+});
+
+describe("detección de grupos sin falsos positivos", () => {
+  it("no considera grupo un chat donde el contacto aparece con nombre y con número", () => {
+    const doc = load(
+      `<div id="main">
+        <div role="row"><div data-id="false_1@lid_A"><div class="copyable-text" data-pre-plain-text="[10:00, ${today}] Ana: "><span class="selectable-text">Hola</span></div></div></div>
+        <div role="row"><div data-id="false_1@lid_B"><div class="copyable-text" data-pre-plain-text="[10:01, ${today}] +506 0000 0000: "><span class="selectable-text">tienen curitas?</span></div></div></div>
+      </div>`,
+    );
+    expect(readOpenChat(doc, now).status).toBe("reading");
+  });
+});

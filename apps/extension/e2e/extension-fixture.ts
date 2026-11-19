@@ -10,6 +10,7 @@ import {
 } from "@playwright/test";
 import {
   buildWhatsAppHtml,
+  FIXTURE_INCOMING_AUTHOR,
   type FixtureOptions,
 } from "../src/content/whatsapp/__fixtures__/whatsapp-dom";
 
@@ -81,7 +82,7 @@ export async function overlayFrame(page: Page): Promise<Frame> {
 /** Simula la llegada de un mensaje nuevo en WhatsApp (lo hace la "página", no la extensión). */
 export async function receiveMessage(page: Page, text: string, date: string): Promise<void> {
   await page.evaluate(
-    ({ text: messageText, date: messageDate }) => {
+    ({ text: messageText, date: messageDate, author }) => {
       const row = document.createElement("div");
       row.setAttribute("role", "row");
       const container = document.createElement("div");
@@ -89,7 +90,7 @@ export async function receiveMessage(page: Page, text: string, date: string): Pr
       container.className = "message-in";
       const copyable = document.createElement("div");
       copyable.className = "copyable-text";
-      copyable.setAttribute("data-pre-plain-text", `[11:00, ${messageDate}] Cliente: `);
+      copyable.setAttribute("data-pre-plain-text", `[11:00, ${messageDate}] ${author}: `);
       const span = document.createElement("span");
       span.className = "selectable-text copyable-text";
       span.textContent = messageText;
@@ -98,6 +99,6 @@ export async function receiveMessage(page: Page, text: string, date: string): Pr
       row.append(container);
       document.querySelector("#main .conversation")?.append(row);
     },
-    { text, date },
+    { text, date, author: FIXTURE_INCOMING_AUTHOR },
   );
 }

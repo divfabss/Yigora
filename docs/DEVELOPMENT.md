@@ -67,7 +67,9 @@ pnpm --filter @yigora/extension build
 
 Cargar `apps/extension/dist` en `chrome://extensions` → **Cargar descomprimida**. Las pruebas E2E cargan la
 extensión real en Chromium y sirven una réplica ficticia de WhatsApp Web en `https://web.whatsapp.com/`.
-Los íconos se generan con `node apps/extension/scripts/generate-icons.mjs`. Guía de la demo: `docs/DEMO.md`.
+Prueba contra WhatsApp Web real (requiere acceso a `web.whatsapp.com` y `static.whatsapp.net`):
+`YIGORA_REAL_WHATSAPP=1 pnpm --filter @yigora/extension test:e2e`. El entorno en la nube `yigora` ya
+permite esos dominios. Los íconos se generan con `node apps/extension/scripts/generate-icons.mjs`. Guía de la demo: `docs/DEMO.md`.
 
 ## Migraciones
 

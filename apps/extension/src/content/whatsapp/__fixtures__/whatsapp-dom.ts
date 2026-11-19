@@ -16,6 +16,9 @@ export interface FixtureOptions {
   readonly messages: readonly FixtureMessage[];
 }
 
+/** Autor de los mensajes entrantes en la réplica (en un chat individual siempre es el mismo). */
+export const FIXTURE_INCOMING_AUTHOR = "Cliente Ficticio";
+
 export const formatFixtureDate = (date: Date): string =>
   `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
@@ -25,7 +28,7 @@ const escapeHtml = (value: string): string =>
 function renderMessage(message: FixtureMessage, index: number, chatId: string): string {
   const outgoing = message.direction === "outgoing";
   const dataId = `${outgoing ? "true" : "false"}_${chatId}_MSG${index}`;
-  const author = outgoing ? "Vendedor" : "Cliente Ficticio +506 0000-0000";
+  const author = outgoing ? "Vendedor" : FIXTURE_INCOMING_AUTHOR;
   const body = message.media
     ? `<div class="media"><img alt="imagen" /></div>`
     : `<div class="copyable-text" data-pre-plain-text="[10:${String(index).padStart(2, "0")}, ${message.date}] ${author}: ">
@@ -41,7 +44,11 @@ export function buildWhatsAppHtml({
 }: FixtureOptions): string {
   return `<!doctype html>
 <html lang="es">
-  <head><meta charset="utf-8" /><title>WhatsApp</title></head>
+  <head>
+    <meta charset="utf-8" /><title>WhatsApp</title>
+    <!-- Como en WhatsApp real: la interfaz ocupa toda la pantalla en una capa con z-index propio. -->
+    <style>#app { position: fixed; inset: 0; z-index: 100; background: #efeae2; }</style>
+  </head>
   <body>
     <div id="app">
       <div id="side" style="position:fixed;left:0;top:0;bottom:0;width:30%;background:#fff">Chats</div>

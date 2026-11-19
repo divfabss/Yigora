@@ -4,6 +4,23 @@ Formato basado en "Keep a Changelog". Categorías: Funcionalidades, Arquitectura
 
 ## [Sin publicar]
 
+### Demo 0.1.1 de la extensión (2026-11-19) — corrección: la ventana no aparecía
+
+- **Corregido:** la ventana flotante quedaba oculta detrás de la interfaz de WhatsApp Web (faltaba
+  `z-index`). Reproducido y verificado contra el WhatsApp Web real.
+- **Corregido:** la lectura podía no ejecutarse nunca porque WhatsApp cambia la página continuamente
+  (presencia, "escribiendo…"); el observador ahora lee como máximo cada 700 ms (throttle) en vez de
+  esperar a que la página se calme (debounce).
+- **Corregido:** la ventana se vaciaba tras 30 s sin uso porque Chrome detiene el service worker; ahora
+  la ventana envía un latido cada 20 s mientras está abierta.
+- **Mejorado:** selectores alternativos para el panel y el título; el texto se toma del último bloque
+  (no de mensajes citados) e incluye emojis; detección de grupos también por autores distintos; si el
+  formato de `data-id` cambia, se usan las clases de dirección.
+- **Diagnóstico:** mensajes `[Yigora]` en la consola del navegador (solo estados y conteos, sin contenido).
+- **Pruebas:** la réplica de WhatsApp ahora tiene capas con `z-index` y la E2E verifica que la ventana
+  quede encima; prueba del observador con cambios constantes; prueba opcional contra WhatsApp Web real
+  (`YIGORA_REAL_WHATSAPP=1`).
+
 ### Demo 0.1.0 de la extensión (2026-11-19)
 
 - **Funcionalidades:** extensión MV3 con ventana flotante sobre WhatsApp Web, lectura automática de los

@@ -20,6 +20,10 @@ test("lee el chat abierto, sugiere en el idioma del cliente y nunca escribe en W
   const overlay = await overlayFrame(page);
 
   await expect(overlay.getByText("Leyendo mensajes de hoy")).toBeVisible();
+  // La ventana debe quedar por ENCIMA de la interfaz de WhatsApp (que usa z-index propios).
+  expect(await page.evaluate(() => document.elementFromPoint(150, 500)?.tagName)).toBe(
+    "YIGORA-ASSISTANT",
+  );
   await expect(overlay.getByTestId("customer-text")).toHaveText(
     "Hi! Do you have anything for allergies?",
   );

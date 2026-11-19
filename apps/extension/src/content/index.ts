@@ -4,6 +4,7 @@ import {
   POSITION_STORAGE_KEY,
   type ContentMessage,
 } from "../shared/messages";
+import { logDiagnostic } from "../shared/diagnostics";
 import { mountOverlay, type OverlayPosition } from "./overlay-host/mount-overlay";
 import { watchConversation } from "./whatsapp/watch-conversation";
 
@@ -37,13 +38,17 @@ async function start(): Promise<void> {
     },
   });
 
+  logDiagnostic("ventana flotante lista", { pausado: paused });
+
   const watcher = watchConversation({
     doc: document,
     isPaused: () => paused,
     onSnapshot: (snapshot) => {
+      logDiagnostic("chat leído", { mensajesDeHoy: snapshot.messages.length });
       send({ type: "reader.snapshot", sessionId, snapshot });
     },
     onStatus: (status) => {
+      logDiagnostic("estado de lectura", { estado: status });
       send({ type: "reader.status", sessionId, status });
     },
   });
@@ -69,4 +74,8 @@ async function start(): Promise<void> {
   });
 }
 
-void start();
+start().catch((error: unknown) => {
+  logDiagnostic("no se pudo iniciar", {
+    error: error instanceof Error ? error.name : "desconocido",
+  });
+});

@@ -79,6 +79,7 @@ chrome.runtime.onConnect.addListener((port) => {
     } else if (session && message.type === "reply.language") {
       void handleReplyLanguage(session, message.language, service);
     }
+    // "overlay.ping" no requiere respuesta: recibirlo ya reinicia el temporizador de inactividad.
   });
   port.onDisconnect.addListener(() => {
     if (session?.port === port) {

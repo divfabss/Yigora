@@ -7,6 +7,7 @@ import {
 } from "../shared/overlay-state";
 
 const RECONNECT_DELAY_MS = 500;
+const HEARTBEAT_INTERVAL_MS = 20_000;
 
 /** Conexión con el service worker; se reconecta si este se reinicia (MV3). */
 export function useOverlayConnection(sessionId: string) {
@@ -17,6 +18,9 @@ export function useOverlayConnection(sessionId: string) {
   useEffect(() => {
     let disposed = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const heartbeat = setInterval(() => {
+      portRef.current?.postMessage({ type: "overlay.ping" } satisfies OverlayMessage);
+    }, HEARTBEAT_INTERVAL_MS);
     const connect = () => {
       const port = chrome.runtime.connect({ name: OVERLAY_PORT_NAME });
       portRef.current = port;
@@ -36,6 +40,7 @@ export function useOverlayConnection(sessionId: string) {
     return () => {
       disposed = true;
       clearTimeout(timer);
+      clearInterval(heartbeat);
       portRef.current?.disconnect();
     };
   }, [sessionId]);

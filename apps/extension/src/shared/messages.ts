@@ -50,6 +50,8 @@ export const overlayMessageSchema = z.discriminatedUnion("type", [
     text: z.string().trim().min(1).max(MAX_MESSAGE_LENGTH),
   }),
   z.object({ type: z.literal("reply.language"), language: replyLanguageSchema }),
+  /** Latido: Chrome detiene el service worker tras 30 s sin eventos; esto lo mantiene activo mientras la ventana esté abierta. */
+  z.object({ type: z.literal("overlay.ping") }),
 ]);
 export type OverlayMessage = z.infer<typeof overlayMessageSchema>;
 

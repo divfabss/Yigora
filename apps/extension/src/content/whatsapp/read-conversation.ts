@@ -6,7 +6,14 @@ import {
 } from "../../shared/messages";
 import { fingerprint } from "./hash";
 import { isMessageFromToday } from "./message-date";
-import { GROUP_CHAT_SUFFIX, PRE_PLAIN_TEXT_ATTRIBUTE, WHATSAPP_SELECTORS as S } from "./selectors";
+import { readMessageText } from "./message-text";
+import {
+  GROUP_CHAT_SUFFIX,
+  MESSAGE_ID_PATTERN,
+  PRE_PLAIN_TEXT_ATTRIBUTE,
+  queryFirst,
+  WHATSAPP_SELECTORS as S,
+} from "./selectors";
 
 /**
  * Lector de SOLO LECTURA del chat abierto en WhatsApp Web.
@@ -17,24 +24,53 @@ export type ReadResult =
   | { readonly status: "reading"; readonly snapshot: ChatSnapshot }
   | { readonly status: "no_chat" | "group" | "unreadable" };
 
-function resolveDirection(row: Element, dataId: string): MessageDirection | null {
+function resolveDirection(row: Element): MessageDirection | null {
+  const dataId = row.getAttribute("data-id") ?? "";
   if (dataId.startsWith("true_")) {
     return "outgoing";
   }
   if (dataId.startsWith("false_")) {
     return "incoming";
   }
-  if (row.matches(S.outgoingClass) || row.querySelector(S.outgoingClass)) {
+  if (row.closest(S.outgoingClass) ?? row.querySelector(S.outgoingClass)) {
     return "outgoing";
   }
-  return row.matches(S.incomingClass) || row.querySelector(S.incomingClass) ? "incoming" : null;
+  return (row.closest(S.incomingClass) ?? row.querySelector(S.incomingClass)) ? "incoming" : null;
 }
 
-/** Filas de mensajes de primer nivel (excluye mensajes citados anidados). */
+/**
+ * Filas de mensajes de primer nivel. Se prefieren los data-id con formato de mensaje
+ * ("true_…"/"false_…"); si WhatsApp cambió ese formato, se usan las clases de dirección.
+ */
 function messageRows(panel: Element): Element[] {
-  return [...panel.querySelectorAll(S.messageRow)].filter(
+  const outermost = [...panel.querySelectorAll(S.messageRow)].filter(
     (row) => !row.parentElement?.closest(S.messageRow),
   );
+  const byId = outermost.filter((row) =>
+    MESSAGE_ID_PATTERN.test(row.getAttribute("data-id") ?? ""),
+  );
+  return byId.length > 0 ? byId : outermost.filter((row) => resolveDirection(row) !== null);
+}
+
+/** Autor según el atributo "[hora, fecha] Autor: ". Solo se usa para contar autores en memoria. */
+function authorOf(stamp: string): string {
+  return stamp.replace(/^\[[^\]]*\]\s*/, "").replace(/:\s*$/, "");
+}
+
+function isGroupChat(rows: readonly Element[]): boolean {
+  if (rows.some((row) => (row.getAttribute("data-id") ?? "").includes(GROUP_CHAT_SUFFIX))) {
+    return true;
+  }
+  const incomingAuthors = new Set(
+    rows
+      .filter((row) => resolveDirection(row) === "incoming")
+      .map((row) => row.querySelector(S.copyableText)?.getAttribute(PRE_PLAIN_TEXT_ATTRIBUTE) ?? "")
+      .filter((stamp) => stamp !== "")
+      .map(authorOf)
+      // Un mismo contacto puede aparecer como nombre o como número: los números no cuentan.
+      .filter((author) => author !== "" && !/^[+\d\s().-]+$/.test(author)),
+  );
+  return incomingAuthors.size > 1;
 }
 
 function readMessage(row: Element, now: Date): ConversationMessage | null {
@@ -43,33 +79,38 @@ function readMessage(row: Element, now: Date): ConversationMessage | null {
   if (!copyable || !stamp || isMessageFromToday(stamp, now) !== true) {
     return null;
   }
-  const direction = resolveDirection(row, row.getAttribute("data-id") ?? "");
-  const text = (copyable.querySelector(S.messageText) ?? copyable).textContent.trim();
+  const direction = resolveDirection(row);
+  const text = readMessageText(copyable);
   if (!direction || text === "") {
     return null;
   }
   return { direction, text: text.slice(0, MAX_MESSAGE_LENGTH) };
 }
 
-/** Identificador del chat a partir del data-id ("false_<chat>_<id>"), sin salir de esta función. */
+/** Identidad del chat (data-id "false_<chat>_<id>" o título), usada solo para una huella local. */
 function chatIdentity(rows: readonly Element[], panel: Element): string {
   const dataId = rows
     .map((row) => row.getAttribute("data-id") ?? "")
-    .find((id) => id.includes("_"));
+    .find((id) => MESSAGE_ID_PATTERN.test(id));
   const chat = dataId?.split("_")[1];
-  return chat ?? panel.querySelector(S.conversationTitle)?.textContent ?? "unknown";
+  if (chat) {
+    return chat;
+  }
+  const title = queryFirst(panel, S.conversationTitle);
+  return title?.getAttribute("title") ?? title?.textContent ?? "unknown";
 }
 
 export function readOpenChat(doc: Document, now: Date): ReadResult {
-  const panel = doc.querySelector(S.conversationPanel);
+  const panel = queryFirst(doc, S.conversationPanel);
   if (!panel) {
     return { status: "no_chat" };
   }
   const rows = messageRows(panel);
-  if (rows.length === 0 && !panel.querySelector(S.copyableText)) {
+  if (rows.length === 0) {
+    // Hay un chat abierto pero no se reconoce ningún mensaje: la estructura de WhatsApp cambió.
     return { status: "unreadable" };
   }
-  if (rows.some((row) => (row.getAttribute("data-id") ?? "").includes(GROUP_CHAT_SUFFIX))) {
+  if (isGroupChat(rows)) {
     return { status: "group" };
   }
   const messages = rows
